@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Audioplayer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!--    <audio controls>-->
+<!--        <source src="music/TutTutChild_HotPursuit.mp3" type="audio/mpeg">-->
+<!--        Тег audio не поддерживается вашим браузером.-->
+<!--    </audio>-->
+
+    <div class="container gradient">
+
+<!--        <img class="cover" src="images/cover.jpg" alt="">-->
+
+        <div class="player controls">
+
+<!--            <a class="button shadow" id="prev" href="#" title=""><<<</a>-->
+            <a class="button shadow" id="play" href="#" title="">Play</a>
+
+            <a class="button shadow" id="stop" href="#" title="">Stop</a>
+            <a class="button shadow" id="next" href="#" title="">>>></a>
+
+            <input type="range" id="seek" value="0" max=""/>
+
+        </div><!-- / player -->
+
+    </div><!-- / Container-->
+
+<script src="Audioplayer.js" defer></script>
+</body>
+</html>
