@@ -62,29 +62,34 @@ class Audioplayer {
     stopPlay = (e) =>{
         e.preventDefault();
         this.song.pause();
-
     };
 
     setTime = () =>{
         let curtime = parseInt(this.song.currentTime, 10);
-        this.input.setAttribute("value", curtime);
+        // this.input.setAttribute("value", curtime);
+        this.input.value = curtime;
+        console.log(curtime);
     };
 
     changeValue = () =>{
         this.song.currentTime = this.input.value;
+        console.log('value changed');
     };
 
     nextSong = (e) =>{
         e.preventDefault();
         console.log('next song');
         this.song.pause();
+        this.input.value = 0;
 
         if (this.id <= this.playlist.length){
             this.song = this.playlist[this.id];
             console.log(this.song);
 
             // this.input.setAttribute('value', '0');
-            this.input.setAttribute('max', this.song.duration);
+            // this.input.setAttribute('max', this.song.duration);
+            // this.song.currentTime = 0.0;
+            this.input.max = this.song.duration;
 
 
             console.log(this.song.duration);
