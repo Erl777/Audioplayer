@@ -7,18 +7,19 @@ class Audioplayer {
         };
         this.playBtn = document.getElementById('play');
         this.stopBtn = document.getElementById('stop');
-        // let prevBtn = document.getElementById('prev');
+        this.prevBtn = document.getElementById('prev');
         this.nextBtn = document.getElementById('next');
         this.input = document.querySelector('input[type="range"]');
         this.song = new Audio(this.settings.playlist[0]);
         this.player = document.querySelector('.player');
         this.id = 0;
         this.playlist = null;
+        this.once = false;
 
         // console.log(this.settings.playlist);
 
         this.method1();
-        this.addPlayList();
+        // this.addPlayList();
     }
 
     addPlayList(){
@@ -30,8 +31,8 @@ class Audioplayer {
             let song =  new Audio(elem);
             this.player.appendChild(song).setAttribute('data-id', `${i}`);
         }
-
         this.playlist = document.querySelectorAll('[data-id]');
+        console.log(this.playlist);
     }
 
     method1 (){
@@ -39,17 +40,24 @@ class Audioplayer {
         this.stopBtn.addEventListener('click', this.stopPlay);
         this.song.addEventListener('timeupdate', this.setTime);
         this.input.addEventListener('change', this.changeValue);
+        this.input.addEventListener('input', this.chooseValue);
+
         this.player.appendChild(this.song).setAttribute('id', 'track');
 
         this.nextBtn.addEventListener('click', this.nextSong);
+        this.prevBtn.addEventListener('click', this.prevSong);
 
     }
 
     startPlay = (e) => {
         e.preventDefault();
 
-        this.input.setAttribute('max', document.getElementById('track').duration);
-        this.song.setAttribute('data-id', this.id);
+        if(this.once === false){
+            this.input.max = document.getElementById('track').duration;
+            this.song.setAttribute('data-id', this.id);
+            this.once = true;
+            this.addPlayList();
+        }
 
         // for (let i = 0; i < this.playlist.length;i++){
         //     this.playlist[i].addEventListener('timeupdate', this.setTime);
@@ -65,40 +73,61 @@ class Audioplayer {
     };
 
     setTime = () =>{
-        let curtime = parseInt(this.song.currentTime, 10);
-        // this.input.setAttribute("value", curtime);
-        this.input.value = curtime;
-        console.log(curtime);
+        this.input.value = parseInt(this.song.currentTime, 10);
+    };
+
+    chooseValue = () => {
+      this.song.removeEventListener('timeupdate', this.setTime);
     };
 
     changeValue = () =>{
         this.song.currentTime = this.input.value;
         console.log('value changed');
+        this.song.addEventListener('timeupdate', this.setTime);
+    };
+
+    prevSong = (e) =>{
+        e.preventDefault();
+
+        console.log('prev song');
+
+        if (this.id > 0){
+            this.song.pause();
+            this.input.value = 0;
+            this.id--;
+            // console.log(this.id);
+            // console.log( this.playlist[this.id] );
+            this.song = this.playlist[this.id];
+            this.song.currentTime = 0;
+            this.input.max = this.song.duration;
+            this.song.play();
+            // console.log(this.song);
+        }
+
     };
 
     nextSong = (e) =>{
         e.preventDefault();
         console.log('next song');
-        this.song.pause();
-        this.input.value = 0;
+        // console.log(this.id);
+        // console.log(this.playlist.length);
 
-        if (this.id <= this.playlist.length){
+        if (this.id < (this.playlist.length - 1)){
+            this.song.pause();
+            this.input.value = 0;
+            this.id++;
             this.song = this.playlist[this.id];
-            console.log(this.song);
-
-            // this.input.setAttribute('value', '0');
-            // this.input.setAttribute('max', this.song.duration);
-            // this.song.currentTime = 0.0;
+            // console.log(this.song);
+            this.song.currentTime = 0;
             this.input.max = this.song.duration;
-
-
-            console.log(this.song.duration);
             this.song.addEventListener('timeupdate', this.setTime);
 
             this.song.play();
         }
-        this.id++;
 
+        // if(this.id === this.playlist.length){
+        //     alert('Последняя песня');
+        // }
 
     }
 
