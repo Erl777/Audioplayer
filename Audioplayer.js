@@ -16,29 +16,13 @@ class Audioplayer {
         this.playlist = null;
         this.once = false;
 
-        // console.log(this.settings.playlist);
-
-        this.method1();
-        // this.addPlayList();
+        this.initialization();
     }
 
-    addPlayList(){
-        // console.log(this.settings.playlist);
-        for (let i = 1; i < this.settings.playlist.length; i++){
-
-            let elem = this.settings.playlist[i];
-            // console.log(elem);
-            let song =  new Audio(elem);
-            this.player.appendChild(song).setAttribute('data-id', `${i}`);
-        }
-        this.playlist = document.querySelectorAll('[data-id]');
-        console.log(this.playlist);
-    }
-
-    method1 (){
+    initialization (){
         this.playBtn.addEventListener('click', this.startPlay);
         this.stopBtn.addEventListener('click', this.stopPlay);
-        this.song.addEventListener('timeupdate', this.setTime);
+
         this.input.addEventListener('change', this.changeValue);
         this.input.addEventListener('input', this.chooseValue);
 
@@ -47,33 +31,44 @@ class Audioplayer {
         this.nextBtn.addEventListener('click', this.nextSong);
         this.prevBtn.addEventListener('click', this.prevSong);
 
+        this.song.setAttribute('data-id', this.id);
+        this.addPlayList();
+        this.addTimeUpdateEvent();
     }
 
-    startPlay = (e) => {
-        e.preventDefault();
+    addPlayList(){
+        for (let i = 1; i < this.settings.playlist.length; i++){
 
+            let elem = this.settings.playlist[i];
+            let song =  new Audio(elem);
+            this.player.appendChild(song).setAttribute('data-id', `${i}`);
+        }
+        this.playlist = document.querySelectorAll('[data-id]');
+    }
+
+    addTimeUpdateEvent(){
+        for (let i = 0; i < this.settings.playlist.length; i++){
+            this.playlist[i].addEventListener('timeupdate', this.setTime);
+        }
+    }
+
+    startPlay = () => {
         if(this.once === false){
             this.input.max = document.getElementById('track').duration;
-            this.song.setAttribute('data-id', this.id);
             this.once = true;
-            this.addPlayList();
         }
-
-        // for (let i = 0; i < this.playlist.length;i++){
-        //     this.playlist[i].addEventListener('timeupdate', this.setTime);
-        //     this.playlist[i].addEventListener('change', this.changeValue);
-        // }
-
         this.song.play();
     };
 
-    stopPlay = (e) =>{
-        e.preventDefault();
+    stopPlay = () =>{
         this.song.pause();
     };
 
     setTime = () =>{
         this.input.value = parseInt(this.song.currentTime, 10);
+        if(this.song.ended){
+            this.nextSong();
+        }
     };
 
     chooseValue = () => {
@@ -82,52 +77,34 @@ class Audioplayer {
 
     changeValue = () =>{
         this.song.currentTime = this.input.value;
-        console.log('value changed');
         this.song.addEventListener('timeupdate', this.setTime);
     };
 
-    prevSong = (e) =>{
-        e.preventDefault();
-
-        console.log('prev song');
+    prevSong = () =>{
 
         if (this.id > 0){
             this.song.pause();
             this.input.value = 0;
             this.id--;
-            // console.log(this.id);
-            // console.log( this.playlist[this.id] );
             this.song = this.playlist[this.id];
             this.song.currentTime = 0;
             this.input.max = this.song.duration;
             this.song.play();
-            // console.log(this.song);
         }
 
     };
 
-    nextSong = (e) =>{
-        e.preventDefault();
-        console.log('next song');
-        // console.log(this.id);
-        // console.log(this.playlist.length);
+    nextSong = () =>{
 
         if (this.id < (this.playlist.length - 1)){
             this.song.pause();
             this.input.value = 0;
             this.id++;
             this.song = this.playlist[this.id];
-            // console.log(this.song);
             this.song.currentTime = 0;
             this.input.max = this.song.duration;
-            this.song.addEventListener('timeupdate', this.setTime);
-
             this.song.play();
         }
-
-        // if(this.id === this.playlist.length){
-        //     alert('Последняя песня');
-        // }
 
     }
 
