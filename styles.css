@@ -74,3 +74,15 @@ input::-webkit-slider-thumb {
 input::-webkit-slider-thumb:hover{
     cursor: pointer;
 }
+
+#timeleft{
+    color: white;
+}
+
+#trackName{
+    margin: 0 15px;
+    padding: 0 15px;
+    color: white;
+    border: 1px solid black;
+    border-radius: 7px;
+}
