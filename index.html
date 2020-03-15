@@ -16,11 +16,11 @@
 
         <div class="player controls">
 
-            <a class="button shadow" id="prev" href="#" title=""><<<</a>
-            <a class="button shadow" id="play" href="#" title="">Play</a>
+            <a class="button shadow" id="prevNew" href="#" title=""><<<</a>
+            <a class="button shadow" id="playNew" href="#" title="">Play</a>
 
-            <a class="button shadow" id="stop" href="#" title="">Stop</a>
-            <a class="button shadow" id="next" href="#" title="">>>></a>
+            <a class="button shadow" id="stopNew" href="#" title="">Stop</a>
+            <a class="button shadow" id="nextNew" href="#" title="">>>></a>
 
             <input type="range" id="seek" value="0" max=""/>
 
@@ -29,6 +29,34 @@
             <p id="trackName" title="song name"></p>
 
         </div><!-- / player -->
+
+        <!-- playlist -->
+
+        <div class="playlist">
+
+            <div class="playlists">
+                <div class="list" data-playlist-item="default">
+                    <img src="img/playlist1.png" class="responsive" title="default playlist" alt="playlist icon">
+                </div>
+                <div class="list" data-playlist-item="customPlaylist">
+                    <img src="img/playlist1.png" class="responsive" title="custom playlist" alt="playlist icon">
+                </div>
+            </div>
+
+            <div class="playlist-controls">
+                <div id="addTrack">
+                    <img src="img/plus.svg" alt="" title="add audio">
+                </div>
+                <div id="delTrack">
+                    <img src="img/minus.svg" alt="" title="delete audio">
+                </div>
+
+            </div>
+
+            <ol id="playlist" data-playlist-name="default">
+
+            </ol>
+        </div>
 
     </div><!-- / Container-->
 

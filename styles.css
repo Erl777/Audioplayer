@@ -1,3 +1,7 @@
+*{
+    box-sizing: border-box;
+}
+
 audio{
     outline:none
 }
@@ -8,18 +12,92 @@ body{
 }
 
 .container{
-    display: inline-flex;
+    display: flex;
+    flex-direction: column;
     background-color: gray;
-    border-radius: 15px;
+    border-radius: 15px 15px 15px 0 ;
+}
+
+.playlist{
+    position: relative;
+    padding: 10px;
+    min-height: 150px;
+}
+
+.playlists{
+    position: absolute;
+    width: 55px;
+    padding: 8px;
+    left: 0;
+    transform: translateX(-100%);
+    background-color: gray;
+    border-radius: 15px 0 0 15px;
+    max-height: calc(100% - 10px);
+    overflow: auto;
+    height: 100%;
+    border-right: 1px solid white;
+    min-height: 50px;
+}
+
+.list{
+    margin-bottom: 5px;
+}
+
+.list:hover{
+    cursor: pointer;
+}
+
+.responsive{
+    width: 100%;
+}
+
+.container ol{
+    padding-left: 20px;
+    margin: 0;
+}
+
+.container ol li{
+    position: relative;
+    transition: .3s;
+    padding: 5px 0;
+}
+
+.container ol li span{
+    position: absolute;
+    right: 0;
+}
+
+.container ol li:hover{
+    cursor: pointer;
+    background-color: #b1a4a4;
+}
+
+.playlist-controls{
+    display: flex;
+    justify-content: flex-end;
+}
+
+.playlist-controls div{
+    margin-right: 5px;
+}
+
+.playlist-controls div:last-child{
+    margin-right: 0;
+}
+
+.playlist-controls img{
+    width: 15px;
+}
+
+#addTrack:hover, #delTrack{
+    cursor: pointer;
 }
 
 .player{
     display: flex;
     align-items: center;
-}
-
-.player{
     padding: 10px 10px 15px 10px;
+    border-bottom: 1px solid white;
 }
 
 .button{
