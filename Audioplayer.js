@@ -20,7 +20,7 @@ class Audioplayer {
 
         this.input = document.querySelector('input[type="range"]');
         this.song = new Audio(this.settings.playlist[0].src);
-        this.player = document.querySelector('.player');
+        this.player = document.getElementById('audios');
         this.id = 0;
         this.audiolist = null;
         this.once = false;
@@ -30,38 +30,32 @@ class Audioplayer {
         this.timer = null;
         this.playlist = '';
         this.playlistsList = document.querySelectorAll('div[data-playlist-item]');
+        //this.activeAudiolist = 'default';
         this.customPlaylist = [
             {
-                src: 'music/1111.mp3',
-                name: '1111',
+                src: 'music/bee_gees_-_staing_alive_(zf.fm).mp3',
+                name: 'Bee Gees - Staying Alive',
                 img: '',
                 author: '',
-                fullTime: '03:07'
+                fullTime: '00:01'
             },
             {
-                src: 'music/2222.mp3',
-                name: '2222',
+                src: 'music/hrj.mp3',
+                name: 'Ray Charles - Hit the road jack',
                 img: '',
                 author: '',
-                fullTime: '04:58'
+                fullTime: '00:02'
             },
             {
-                src: 'music/3333.mp3',
-                name: '3333',
+                src: 'music/ljapis_trubeckoj_-_kapital_(zvukoff.ru).mp3',
+                name: 'Ляпис Трубецкой - Капитал',
                 img: '',
                 author: '',
-                fullTime: '02:55'
+                fullTime: '00:03'
             },
-            {
-                src: 'music/4444.mp3',
-                name: '4444',
-                img: '',
-                author: '',
-                fullTime: '03:29'
-            }
         ];
 
-        console.log(this.settings);
+        // console.log(this.settings);
         this.checkErrors();
         this.generatePlaylist(this.settings.playlist);
 
@@ -185,6 +179,7 @@ class Audioplayer {
         this.song.pause();
         clearInterval(this.timer);
         this.timer = false;
+        //console.log('stop this shit');
     };
 
     setTime = () =>{
@@ -220,6 +215,7 @@ class Audioplayer {
     }
 
     countTime(){
+        console.log(this.song);
         let fullTime = parseInt(this.song.duration, 10);
         this.minutes = parseInt((fullTime / 60), 10);
         this.seconds = fullTime - (this.minutes * 60);
@@ -284,44 +280,76 @@ class Audioplayer {
     };
 
     nextSongFromPlaylist = (e) => {
-        //console.log(e.target);
+
+        let playlistName = document.getElementById('playlist').dataset.playlistName;
+
         let song = '';
         if(e.target.classList.contains('song')) song = e.target;
         else song = e.target.parentElement;
         let songId = song.dataset.songId;
-        //console.log(songId);
-        //console.log(song);
+        this.song.pause();
+        this.id = songId;
+
         let curAudio = document.querySelector('.player.controls').querySelectorAll('audio');
-        //console.log(curAudio);
         for(let i = 0; i < curAudio.length; i++){
             curAudio[i].remove();
         }
-        let playListName = document.getElementById('playlist').dataset.playlistName;
-        console.log(playListName);
 
-        if(playListName === 'default') this.generateAudioElems(this.settings.playlist, songId);
-        if(playListName !== 'default') this.generateAudioElems(this.customPlaylist, songId);
+        if(playlistName === 'default') this.generateAudioElems(this.settings.playlist, songId);
+        if(playlistName !== 'default') this.generateAudioElems(this.customPlaylist, songId);
 
     };
 
     generateAudioElems(playlist, id){
         for (let i = 0; i < playlist.length; i++){
-            let src = playlist[i].src;
-            //let fullTime = playlist[i].fullTime;
-            let coincidence = 'track';
-            let string = '';
+            let elem = playlist[i].src;
+            let song =  new Audio(elem);
+
             if (id == i) {
-                console.log(123);
-                string = `<audio id="${coincidence}" src="${src}" data-id="${i}"></audio>`;
+                this.player.appendChild(song);
+                song.setAttribute( 'data-id', `${i}`);
+                song.setAttribute( 'id', `track`);
             }
             else {
-                string = `<audio src="${src}" data-id="${i}"></audio>`;
+                this.player.appendChild(song).setAttribute('data-id', `${i}`);
             }
-            this.playlist += string;
+            //song.load();
         }
-        document.querySelector('.player.controls').innerHTML += this.playlist;
-        //this.addPlaylistToPage(this.playlist);
-        this.playlist = '';
+
+        console.log('созданы и загруженны треки');
+
+        this.setNewTrackFromPlaylist();
+        this.startPlayFromPlaylist();
+        // this.countTime();
+
+    }
+
+    setNewTrackFromPlaylist(){
+        this.song = document.getElementById('track');
+        // console.log(this.song);
+    }
+
+    startPlayFromPlaylist (){
+        //console.log(this.song);
+        //console.log(this.song.duration);
+        //console.log(document.getElementById('track').duration);
+
+        try {
+            this.song.oncanplay = () => {
+                console.log(this.song.duration);
+                if(this.once === true){
+                    this.countTime();
+                }
+                //this.song.play();
+                this.startPlay();
+                // this.timeReduction();
+            };
+        }
+        catch (e) {
+            console.log('не вышло');
+            console.log(e);
+        }
+
     }
 
     getSongName(){
