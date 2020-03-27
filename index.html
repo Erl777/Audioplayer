@@ -16,15 +16,30 @@
 
         <div class="player controls">
 
-            <a class="button shadow" id="prevNew" href="#" title=""><<<</a>
-            <a class="button shadow" id="playNew" href="#" title="">Play</a>
+            <div class="buttons">
 
-            <a class="button shadow" id="stopNew" href="#" title="">Stop</a>
-            <a class="button shadow" id="nextNew" href="#" title="">>>></a>
+                <a class="button shadow" id="prevNew" href="#" title="">
+                    <img class="img-relative" src="img/next.svg" style="transform: rotate(180deg)" alt="">
+                </a>
+                <a class="button shadow" id="playNew" href="#" title="">
+                    <img class="img-relative" src="img/play.svg" alt="">
+                </a>
 
-            <input type="range" id="seek" value="0" max=""/>
+                <a class="button shadow" id="stopNew" href="#" title="">
+                    <img class="img-relative" src="img/stop.svg" alt="">
+                </a>
+                <a class="button shadow" id="nextNew" href="#" title="">
+                    <img class="img-relative" src="img/next.svg" alt="">
+                </a>
 
-            <span id="timeleft">00:00</span>
+            </div>
+
+            <div class="progress-and-time">
+                <input type="range" id="seek" value="0" max=""/>
+
+                <span id="timeleft">00:00</span>
+            </div>
+
 
             <p id="trackName" title="song name"></p>
 

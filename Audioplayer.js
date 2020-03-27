@@ -37,21 +37,21 @@ class Audioplayer {
                 name: 'Bee Gees - Staying Alive',
                 img: '',
                 author: '',
-                fullTime: '00:01'
+                fullTime: '04:38'
             },
             {
                 src: 'music/hrj.mp3',
                 name: 'Ray Charles - Hit the road jack',
                 img: '',
                 author: '',
-                fullTime: '00:02'
+                fullTime: '01:52'
             },
             {
                 src: 'music/ljapis_trubeckoj_-_kapital_(zvukoff.ru).mp3',
                 name: 'Ляпис Трубецкой - Капитал',
                 img: '',
                 author: '',
-                fullTime: '00:03'
+                fullTime: '03:20'
             },
         ];
 
@@ -94,8 +94,6 @@ class Audioplayer {
 
     changePlaylist = (e) => {
         let data = e.target.parentElement.dataset.playlistItem;
-        //console.log(e.target.parentElement);
-        //console.log(data);
         if(data === 'default') this.generatePlaylist(this.settings.playlist);
         if(data !== 'default') this.generatePlaylist(this.customPlaylist);
         document.getElementById('playlist').dataset.playlistName = data;
@@ -104,7 +102,6 @@ class Audioplayer {
 
     refreshEventListeners(){
         let songArr = document.getElementById('playlist').querySelectorAll('li[data-song-id]');
-        //console.log(songArr);
         for(let i = 0; i < songArr.length; i++){
             songArr[i].addEventListener('click', this.nextSongFromPlaylist);
         }
@@ -147,7 +144,6 @@ class Audioplayer {
         for (let i = 1; i < this.settings.playlist.length; i++){
 
             let elem = this.settings.playlist[i].src;
-            // console.log(elem);
             let song =  new Audio(elem);
             this.player.appendChild(song).setAttribute('data-id', `${i}`);
         }
@@ -172,14 +168,12 @@ class Audioplayer {
         }
 
         this.song.play();
-        //console.log(this.audiolist);
     };
 
     stopPlay = () =>{
         this.song.pause();
         clearInterval(this.timer);
         this.timer = false;
-        //console.log('stop this shit');
     };
 
     setTime = () =>{
@@ -215,7 +209,6 @@ class Audioplayer {
     }
 
     countTime(){
-        console.log(this.song);
         let fullTime = parseInt(this.song.duration, 10);
         this.minutes = parseInt((fullTime / 60), 10);
         this.seconds = fullTime - (this.minutes * 60);
@@ -313,36 +306,29 @@ class Audioplayer {
             else {
                 this.player.appendChild(song).setAttribute('data-id', `${i}`);
             }
-            //song.load();
         }
 
-        console.log('созданы и загруженны треки');
+        // console.log('созданы и загруженны треки');
+        this.audiolist = document.querySelectorAll('[data-id]');
 
         this.setNewTrackFromPlaylist();
         this.startPlayFromPlaylist();
-        // this.countTime();
 
     }
 
     setNewTrackFromPlaylist(){
         this.song = document.getElementById('track');
-        // console.log(this.song);
     }
 
     startPlayFromPlaylist (){
-        //console.log(this.song);
-        //console.log(this.song.duration);
-        //console.log(document.getElementById('track').duration);
 
         try {
             this.song.oncanplay = () => {
-                console.log(this.song.duration);
                 if(this.once === true){
                     this.countTime();
                 }
-                //this.song.play();
                 this.startPlay();
-                // this.timeReduction();
+                this.getSongName();
             };
         }
         catch (e) {
@@ -353,9 +339,17 @@ class Audioplayer {
     }
 
     getSongName(){
+        let songId = this.song.dataset.id;
+        let playlistName = document.getElementById('playlist').dataset.playlistName;
         let elem = document.getElementById('trackName');
-        let b = this.song.src.substr(this.song.src.lastIndexOf('/')+1);
-        elem.textContent = b.split('.')[0];
+
+        if(playlistName == 'default'){
+            elem.textContent = this.settings.playlist[songId].name;
+        }
+        else {
+            elem.textContent = this.customPlaylist[songId].name;
+        }
+
     }
 
 }
@@ -364,7 +358,7 @@ new Audioplayer({
     playlist: [
             {
                 src: 'music/halogen-u-got-that.mp3',
-                name: 'halogen u got that',
+                name: 'Halogen u got that',
                 img: '',
                 author: '',
                 fullTime: '03:07'
@@ -385,7 +379,7 @@ new Audioplayer({
             },
             {
                 src: 'music/tones-and-i-dance-monkey.mp3',
-                name: 'tones and i dance monkey',
+                name: 'Tones and i dance monkey',
                 img: '',
                 author: '',
                 fullTime: '03:29'

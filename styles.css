@@ -9,12 +9,14 @@ audio{
 body{
     display: flex;
     justify-content: center;
+    --main-color: #a7a1a1;
+    font-family: Georgia, sans-serif;
 }
 
 .container{
     display: flex;
     flex-direction: column;
-    background-color: gray;
+    background-color: var(--main-color);
     border-radius: 15px 15px 15px 0 ;
 }
 
@@ -30,7 +32,7 @@ body{
     padding: 8px;
     left: 0;
     transform: translateX(-100%);
-    background-color: gray;
+    background-color: var(--main-color);
     border-radius: 15px 0 0 15px;
     max-height: calc(100% - 10px);
     overflow: auto;
@@ -69,7 +71,8 @@ body{
 
 .container ol li:hover{
     cursor: pointer;
-    background-color: #b1a4a4;
+    background-color: rgba(255,255,255, 0.85);
+    border-radius: 4px;
 }
 
 .playlist-controls{
@@ -95,21 +98,30 @@ body{
 
 .player{
     display: flex;
+    /*flex-direction: column-reverse;*/
     align-items: center;
     padding: 10px 10px 15px 10px;
     border-bottom: 1px solid white;
 }
 
 .button{
-    display: block;
-    background-color: gold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 30px;
+    background-color: #ffffff;
     margin: 0 5px;
-    padding: 5px;
+    padding: 8px;
     border-radius: 50%;
     text-decoration: none;
     color: black;
     font-weight: bold;
 
+}
+
+.buttons, .progress-and-time{
+    display: flex;
+    align-items: center;
 }
 
 .shadow{
@@ -163,4 +175,8 @@ input::-webkit-slider-thumb:hover{
     color: white;
     border: 1px solid black;
     border-radius: 7px;
+}
+
+.img-relative{
+    max-width: 100%;
 }
