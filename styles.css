@@ -11,6 +11,8 @@ body{
     justify-content: center;
     --main-color: #a7a1a1;
     font-family: Georgia, sans-serif;
+    flex-direction: column;
+    align-items: center;
 }
 
 .container{
@@ -179,4 +181,12 @@ input::-webkit-slider-thumb:hover{
 
 .img-relative{
     max-width: 100%;
+}
+
+.separator{
+    margin: 0 5px;
+}
+
+.ready{
+    text-decoration: line-through;
 }

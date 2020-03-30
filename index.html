@@ -36,8 +36,9 @@
 
             <div class="progress-and-time">
                 <input type="range" id="seek" value="0" max=""/>
-
                 <span id="timeleft">00:00</span>
+                <span class="separator">/</span>
+                <span id="song-duration">00:00</span>
             </div>
 
 
@@ -57,20 +58,19 @@
                 <div class="list" data-playlist-item="default">
                     <img src="img/playlist1.png" class="responsive" title="default playlist" alt="playlist icon">
                 </div>
-                <div class="list" data-playlist-item="customPlaylist">
+                <div class="list" data-playlist-item="custom">
                     <img src="img/playlist1.png" class="responsive" title="custom playlist" alt="playlist icon">
                 </div>
             </div>
 
-            <div class="playlist-controls">
-                <div id="addTrack">
-                    <img src="img/plus.svg" alt="" title="add audio">
-                </div>
-                <div id="delTrack">
-                    <img src="img/minus.svg" alt="" title="delete audio">
-                </div>
-
-            </div>
+<!--            <div class="playlist-controls">-->
+<!--                <div id="addTrack">-->
+<!--                    <img src="img/plus.svg" alt="" title="add audio">-->
+<!--                </div>-->
+<!--                <div id="delTrack">-->
+<!--                    <img src="img/minus.svg" alt="" title="delete audio">-->
+<!--                </div>-->
+<!--            </div>-->
 
             <ol id="playlist" data-playlist-name="default">
 
@@ -78,6 +78,17 @@
         </div>
 
     </div><!-- / Container-->
+
+    <ul>
+        <li class="ready"> кнопка проигрывания</li>
+        <li class="ready"> кнопка следующая песня (переключение вперед)</li>
+        <li class="ready"> переключение песни из плейлиста</li>
+        <li class="ready"> кнопка назад (переключение назад) </li>
+        <li class="ready"> переключение плейлистов (вкладок) </li>
+        <li> проверить автоматическое переключение треков </li>
+        <li> дата атрибуты для иконок плейлистов </li>
+        <li> динамическая отрисовка плейлистов </li>
+    </ul>
 
 
 <script src="Audioplayer.js" defer></script>
