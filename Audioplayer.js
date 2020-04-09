@@ -22,7 +22,6 @@ class Audioplayer {
         this.song = null;
         this.player = document.getElementById('audios');
         this.id = 0;
-        //this.audiolist = null;
         this.once = false;
         this.timeElem = document.getElementById('timeleft');
         this.minutes = 0;
@@ -42,8 +41,8 @@ class Audioplayer {
         this.playBtn.addEventListener('click', this.startPlay);
         this.stopBtn.addEventListener('click', this.stopPlay);
 
-        //this.input.addEventListener('change', this.changeValue);
-        //this.input.addEventListener('input', this.chooseValue);
+        this.input.addEventListener('change', this.changeValue);
+        this.input.addEventListener('input', this.chooseValue);
 
         /* Создание и присваивание нового трека переменной */
         this.createAudioElem();
@@ -74,9 +73,9 @@ class Audioplayer {
         }
 
         this.song.setAttribute('data-id', this.id);
-        //this.addPlayList();
+
         this.addTimeUpdateEvent();
-        //this.getSongName();
+
     }
 
     addAudioElem(){
@@ -130,22 +129,25 @@ class Audioplayer {
         this.playlistContainer.innerHTML = list;
     }
 
-    startPlay = (e) => {
-        // e.preventDefault();
-        // if(this.once === false){
-        //
-        //     this.once = true;
-        //     this.countTime();
-        //     this.timeReduction();
-        // }
-        // if(this.timer === false){
-        //     this.timeReduction();
-        // }
+    startPlay = () => {
 
-        this.countTime();
-        this.timeReduction();
-        this.input.max = parseInt(this.song.duration);
-        this.song.play();
+        if(this.song.paused ){
+
+            this.song.play();
+            this.countTime();
+            // this.timeReduction();
+            this.newTimeReduction();
+            this.getSongName();
+            this.input.max = parseInt(this.song.duration);
+        }
+
+        this.song.oncanplay = () => {
+            this.countTime();
+            // this.timeReduction();
+            this.newTimeReduction();
+            this.input.max = parseInt(this.song.duration);
+            this.song.play();
+        }
 
     };
 
@@ -156,9 +158,7 @@ class Audioplayer {
     changeSrcInAudioElem (playlist, songId) {
 
         let playlistName = this.getShownPlaylistName();
-        // console.log(playlistName);
-        // console.log(typeof playlistName);
-        // console.log(this.settings.playlist[playlistName][songId]);
+
         this.song.src = this.settings.playlist[playlistName][songId].src; // как называется использвание 2х [] скобок?
         this.song.load();
         this.startPlay();
@@ -166,8 +166,6 @@ class Audioplayer {
     }
 
     nextSong = () =>{
-
-        // console.log(this.id);
 
         let playlistName = this.getShownPlaylistName();
 
@@ -184,29 +182,10 @@ class Audioplayer {
 
         }
 
-
-        // if (this.id < (this.audiolist.length - 1)){
-        //     this.song.pause();
-        //     this.input.value = 0;
-        //     this.id++;
-        //     this.song = this.audiolist[this.id];
-        //     this.song.currentTime = 0;
-        //     this.input.max = this.song.duration;
-        //     this.countTime();
-        //     this.restartTimer();
-        //     this.getSongName();
-        //     this.song.play();
-        // }
-        //
-        // if(this.song.ended && this.id === (this.audiolist.length - 1)){
-        //     clearInterval(this.timer);
-        //     this.timer = false;
-        // }
     };
 
     nextSongFromPlaylist = (e) => {
 
-        // let playlistName = document.getElementById('playlist').dataset.playlistName;
         let playlistName = this.getShownPlaylistName();
 
         let song = '';
@@ -217,14 +196,6 @@ class Audioplayer {
         this.id = songId;
 
         this.changeSrcInAudioElem(this.settings.playlist[playlistName], songId);
-
-        // let curAudio = document.querySelector('.player.controls').querySelectorAll('audio');
-        // for(let i = 0; i < curAudio.length; i++){
-        //     curAudio[i].remove();
-        // }
-        //
-        // if(playlistName === 'default') this.generateAudioElems(this.settings.playlist, songId);
-        // if(playlistName !== 'default') this.generateAudioElems(this.customPlaylist, songId);
 
     };
 
@@ -251,9 +222,6 @@ class Audioplayer {
 
     changePlaylist = (e) => {
         let data = e.target.parentElement.dataset.playlistItem;
-        //console.log(data);
-        // if(data === 'default') this.generatePlaylist(this.getFirstArrFromPlaylist());
-        // if(data !== 'default') this.generatePlaylist(this.settings.playlist[data]);
         this.generatePlaylist(this.settings.playlist[data]);
         document.getElementById('playlist').dataset.playlistName = data;
         this.refreshEventListeners();
@@ -266,14 +234,11 @@ class Audioplayer {
         }
     }
 
-    stopPlay = (e) =>{
-        // e.preventDefault();
+    stopPlay = () =>{
         this.song.pause();
         clearInterval(this.timer);
         this.timer = false;
     };
-
-    /* --------------------------------------------- */
 
     countTime(){
         let fullTime = parseInt(this.song.duration, 10);
@@ -288,6 +253,12 @@ class Audioplayer {
         }
         let time = document.getElementById('song-duration');
         time.textContent = (`${localMinutes}:${locSec}`);
+    }
+
+    /* --------------------------------------------- */
+
+    checkSongCondition(){
+        console.log('Состояние песни = ' + this.song.readyState);
     }
 
     checkErrors(){
@@ -312,44 +283,41 @@ class Audioplayer {
 
 
     setTime = () =>{
-        this.input.value = parseInt(this.song.currentTime, 10);
+        // this.input.value = parseInt(this.song.currentTime, 10);
         if(this.song.ended){
             this.nextSong();
         }
-        if(this.song.ended && this.id === this.audiolist.length) clearInterval(this.timer);
+        // if(this.song.ended && this.id === this.audiolist.length) clearInterval(this.timer);
     };
 
-    timeReduction(){
-        let fullTime = parseInt(this.song.duration, 10);
-        //let newTime = 0 + this.input.value;
+    chooseValue = () => {
+      this.song.removeEventListener('timeupdate', this.setTime);
+      console.log('this.timer id = ' + this.timer);
+      clearInterval(this.timer);
+    };
 
+    changeValue = () =>{
 
-        // console.log(this.minutes);
-        // console.log(this.seconds);
-        // console.log(this.song.currentTime);
+        this.checkSongCondition();
+        this.song.currentTime = this.input.value;
 
-        if(this.song.currentTime !== 0){
-            // console.log('попал');
-            if( (this.song.currentTime / 60) > 0) this.minutes = parseInt(this.song.currentTime / 60) ;
-            if (this.song.currentTime > 60) this.seconds = fullTime - (this.minutes * 60 );
-            else  this.seconds = this.song.currentTime;
-        }
-        else {
-            this.minutes = 0;
-            this.seconds = 0;
-        }
+    };
 
-        //this.minutes = parseInt((fullTime / 60), 10);
-        //this.seconds = fullTime - (this.minutes * 60) + this.song.currentTime;
+    newTimeReduction(){
 
-        //let localMinutes = parseInt((fullTime / 60), 10);
-        //let localSeconds = fullTime - (this.minutes * 60) ;
-        let strMin = '00';
-        // console.log(this.minutes);
+        this.chooseValue();
+
+        let shift = this.input.value;
+
+        this.minutes = parseInt( ( shift / 60 ).toFixed(2));
+        this.seconds = ( shift - (this.minutes * 60) );
+
+        let strMin = '';
+        let strSec = '';
 
         this.timer = setInterval(() =>{
-
-            this.seconds++;
+            strMin = '';
+            strSec = this.seconds;
 
             if(this.seconds > 59){
                 this.minutes++;
@@ -362,110 +330,35 @@ class Audioplayer {
             }
 
             if(this.seconds < 10){
-                this.seconds = '0' + this.seconds;
+                strSec = '0' + this.seconds;
             }
-            this.timeElem.textContent = (`${strMin}:${this.seconds}`);
 
-            if(this.song.ended() ){
+            if( this.minutes < 10 ){
+                strMin = '0' + this.minutes;
+            }
+
+            console.log(strMin + " " + strSec);
+            this.timeElem.textContent = (`${strMin}:${strSec}`);
+
+            if(this.song.ended ){
                 console.log('finished playing');
                 clearInterval(this.timer);
                 this.nextSong();
             }
 
+            this.seconds++;
+            this.input.value = this.song.currentTime;
+
         },1000);
 
     }
 
-    timeReductionRez(){
-        let fullTime = parseInt(this.song.duration, 10);
-        let newTime = fullTime - this.input.value;
-        this.minutes = parseInt((newTime / 60), 10);
-        this.seconds = newTime - (this.minutes * 60);
-        let localMinutes;
-        this.timer = setInterval(() =>{
-            if(this.seconds < 1){
-                this.minutes--;
-                this.seconds = 60;
-            }
-            this.seconds--;
-
-            if(this.minutes < 10){
-                localMinutes = '0' + this.minutes;
-            }
-            if(this.seconds < 10){
-                this.seconds = '0' + this.seconds;
-            }
-            this.timeElem.textContent = (`${localMinutes}:${this.seconds}`);
-        },1000);
-
-    }
-
-    countTimeRez(){
-        let fullTime = parseInt(this.song.duration, 10);
-        this.minutes = parseInt((fullTime / 60), 10);
-        this.seconds = fullTime - (this.minutes * 60);
-        let localMinutes;
-        if(this.minutes < 10){
-            localMinutes = '0' + this.minutes;
-        }
-        if(this.seconds < 10){
-            this.seconds = '0' + this.seconds;
-        }
-        let time = document.getElementById('song-duration');
-        time.textContent = (`${localMinutes}:${this.seconds}`);
-    }
-
-    chooseValue = () => {
-      this.song.removeEventListener('timeupdate', this.setTime);
-      clearInterval(this.timer);
-    };
-
-    changeValue = () =>{
-        this.song.currentTime = this.input.value;
-        this.timeReduction();
-        console.log(this.input.value);
-        this.song.addEventListener('timeupdate', this.setTime);
-    };
-
-    restartTimer(){
-        clearInterval(this.timer );
-        this.timeReduction();
-    }
-
-    setNewTrackFromPlaylist(){
-        this.song = document.getElementById('track');
-    }
-
-    startPlayFromPlaylist (){
-
-        try {
-            this.song.oncanplay = () => {
-                if(this.once === true){
-                    this.countTime();
-                }
-                this.startPlay();
-                this.getSongName();
-            };
-        }
-        catch (e) {
-            console.log('не вышло');
-            console.log(e);
-        }
-
-    }
+    /* Готовые функциит(не требующие изменения и не вызыващие подозрений) */
 
     getSongName(){
-        let songId = this.song.dataset.id;
-        let playlistName = document.getElementById('playlist').dataset.playlistName;
+        let playlistName = this.getShownPlaylistName();
         let elem = document.getElementById('trackName');
-
-        if(playlistName == 'default'){
-            elem.textContent = this.settings.playlist[songId].name;
-        }
-        else {
-            elem.textContent = this.customPlaylist[songId].name;
-        }
-
+        elem.textContent = this.settings.playlist[playlistName][this.id].name;
     }
 
 }
