@@ -132,22 +132,22 @@ class Audioplayer {
     startPlay = () => {
 
         if(this.song.paused ){
-
+            console.log('условие is paused');
             this.song.play();
             this.countTime();
-            // this.timeReduction();
             this.newTimeReduction();
             this.getSongName();
             this.input.max = parseInt(this.song.duration);
         }
 
         this.song.oncanplay = () => {
+            console.log('обычное условие');
             this.countTime();
-            // this.timeReduction();
             this.newTimeReduction();
             this.input.max = parseInt(this.song.duration);
             this.song.play();
         }
+
 
     };
 
@@ -175,11 +175,6 @@ class Audioplayer {
             this.id++;
             this.changeSrcInAudioElem(this.settings.playlist[playlistName], this.id);
 
-            if(this.song.ended && this.id === (this.audiolist.length - 1)){
-                clearInterval(this.timer);
-                this.timer = false;
-            }
-
         }
 
     };
@@ -193,6 +188,9 @@ class Audioplayer {
         else song = e.target.parentElement;
         let songId = song.dataset.songId;
         this.song.pause();
+        // тут происходит обнуление переменной инпута, в следствии при пересчете в timeReduction обнуляются значения
+        this.input.value = 0;
+        //---------------------
         this.id = songId;
 
         this.changeSrcInAudioElem(this.settings.playlist[playlistName], songId);
@@ -252,7 +250,16 @@ class Audioplayer {
             locSec = '0' + locSec;
         }
         let time = document.getElementById('song-duration');
-        time.textContent = (`${localMinutes}:${locSec}`);
+        // при переклчении межу песнями выводило NaN значение. Код ниже это исправляет
+        if(!this.song.duration) {
+            console.log('song is not loaded yet');
+            time.textContent = '00:00';
+        }
+        else {
+            time.textContent = (`${localMinutes}:${locSec}`);
+        }
+        //------------------------------------
+
     }
 
     /* --------------------------------------------- */
@@ -292,7 +299,7 @@ class Audioplayer {
 
     chooseValue = () => {
       this.song.removeEventListener('timeupdate', this.setTime);
-      console.log('this.timer id = ' + this.timer);
+      //console.log('this.timer id = ' + this.timer);
       clearInterval(this.timer);
     };
 
@@ -337,7 +344,7 @@ class Audioplayer {
                 strMin = '0' + this.minutes;
             }
 
-            console.log(strMin + " " + strSec);
+            // console.log(strMin + " " + strSec);
             this.timeElem.textContent = (`${strMin}:${strSec}`);
 
             if(this.song.ended ){
