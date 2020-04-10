@@ -22,13 +22,12 @@ class Audioplayer {
         this.song = null;
         this.player = document.getElementById('audios');
         this.id = 0;
-        this.once = false;
         this.timeElem = document.getElementById('timeleft');
         this.minutes = 0;
         this.seconds = 0;
         this.timer = null;
         this.playlistContainer = document.getElementById('playlist');
-        this.playlistsList = document.querySelectorAll('div[data-playlist-item]');
+        this.playlistsList = null;
 
         // console.log(this.settings);
         //this.checkErrors();
@@ -48,6 +47,10 @@ class Audioplayer {
         this.createAudioElem();
         /*  Добавление трека */
         this.addAudioElem();
+        /* Добавление плейлистов в колонку динамиески  */
+        this.generatePlaylists();
+        /* Создание списка новых элементов  */
+        this.playlistsList = document.querySelectorAll('div[data-playlist-item]');
 
         if(this.settings.buttonsSwitches !== false){
             this.nextBtn.addEventListener('click', this.nextSong);
@@ -74,7 +77,7 @@ class Audioplayer {
 
         this.song.setAttribute('data-id', this.id);
 
-        this.addTimeUpdateEvent();
+
 
     }
 
@@ -281,14 +284,6 @@ class Audioplayer {
 
     }
 
-
-    addTimeUpdateEvent(){
-        for (let i = 0; i < this.settings.playlist.length; i++){
-            this.audiolist[i].addEventListener('timeupdate', this.setTime);
-        }
-    }
-
-
     setTime = () =>{
         // this.input.value = parseInt(this.song.currentTime, 10);
         if(this.song.ended){
@@ -366,6 +361,26 @@ class Audioplayer {
         let playlistName = this.getShownPlaylistName();
         let elem = document.getElementById('trackName');
         elem.textContent = this.settings.playlist[playlistName][this.id].name;
+    }
+
+    /* Свежие */
+
+    generatePlaylists(){
+        let playlistsContainer = document.querySelector('.playlists');
+        let playlistsNamesArr = Object.keys(this.settings.playlist);
+
+        let playlistElem = '';
+
+        for( let i = 0; i < playlistsNamesArr.length; i++ ){
+            playlistElem = `
+                <div class='list' data-playlist-item=${playlistsNamesArr[i]}>
+                    <img src='img/playlist1.png' class='responsive' title='${playlistsNamesArr[i]}' alt='playlist icon'>
+                </div>`;
+
+            playlistsContainer.innerHTML += playlistElem;
+        }
+
+
     }
 
 }
