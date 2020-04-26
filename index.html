@@ -54,6 +54,39 @@
 
         <div class="playlist">
 
+            <div class="openAddingField" id="openAddingField" title="Добавить песню в открытый плейлист">
+                <img src="img/plus.svg" alt="">
+            </div>
+
+            <div id="addSongField" class="addSongField">
+
+                <div>
+                    <label>
+                        Название песни:
+                        <input id="newSongName" type="text">
+                    </label>
+
+                    <label>
+                        Путь к песне:
+                        <input id="newSongSrc" type="text">
+                    </label>
+
+                    <label>
+                        Длительность песни:
+                        <input id="newSongDuration" type="text" value="00:00">
+                    </label>
+
+                </div>
+
+                <div class="adding-controls">
+                    <button type="button" id="addSongBtn">Добавить</button>
+                    <button type="button" id="addSongBtnClose">Закрыть</button>
+                </div>
+
+
+
+            </div>
+
             <div class="playlists">
 
             </div>
@@ -84,7 +117,7 @@
         <li class="ready"> динамическая отрисовка плейлистов </li>
         <hr>
         <li class="ready"> подсветка активной песни </li>
-        <li class=""> добавление песни в плейлист </li>
+        <li class="ready"> добавление песни в плейлист </li>
         <li class=""> добавление плейлиста </li>
 
     </ul>

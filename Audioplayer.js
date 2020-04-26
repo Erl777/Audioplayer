@@ -29,6 +29,7 @@ class Audioplayer {
         this.playlistContainer = document.getElementById('playlist');
         this.playlistsList = null;
         this.playingPlaylist = Object.keys(this.settings.playlist)[0];
+        this.addSongField = document.getElementById('addSongField');
 
         // console.log(this.settings);
         //this.checkErrors();
@@ -78,6 +79,10 @@ class Audioplayer {
         }
 
         this.song.setAttribute('data-id', this.id);
+
+        document.getElementById('openAddingField').addEventListener('click', this.toggleAddingField);
+        document.getElementById('addSongBtnClose').addEventListener('click', this.toggleAddingField);
+        document.getElementById('addSongBtn').addEventListener('click', this.addNewSongToPlaylist);
 
 
 
@@ -285,6 +290,44 @@ class Audioplayer {
     }
 
     /* --------------------------------------------- */
+
+    toggleAddingField(){
+        let window = document.getElementById('addSongField');
+        window.classList.toggle('open');
+    }
+
+    addNewSongToPlaylist = () => {
+        let songNameInput = document.getElementById('newSongName');
+        let songSrcInput = document.getElementById('newSongSrc');
+        let songDurationInput = document.getElementById('newSongDuration');
+        let songName = songNameInput.value;
+        let songSrc = songSrcInput.value;
+        let songDuration = songDurationInput.value;
+
+        let newSongObj = {src: songSrc, name: songName, fullTime: songDuration};
+
+        if( songName !== '' && songSrc !== '' && songDuration !== ''){
+
+            // добавление параметров песни в массив с плейлистом
+            this.settings.playlist[this.getShownPlaylistName()].push(newSongObj);
+
+            // Очистка интутов после добавления
+            songNameInput.value = '';
+            songSrcInput.value = '';
+            songDurationInput.value = '';
+
+            // отрисовка плейлиста с новой песней
+            this.generatePlaylist(this.settings.playlist[this.getShownPlaylistName()]);
+            document.getElementById('playlist').dataset.playlistName = this.getShownPlaylistName();
+            this.refreshEventListeners();
+            this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
+        }
+        else {
+            alert('что-то не заполненно');
+        }
+        console.log(this.settings.playlist[this.getShownPlaylistName()]);
+
+    };
 
     changePlayingPlaylist(){
         // изменение игращего плейлиста

@@ -24,7 +24,7 @@ body{
 
 .playlist{
     position: relative;
-    padding: 10px;
+    padding: 5px 10px 10px 10px;
     min-height: 150px;
 }
 
@@ -33,10 +33,11 @@ body{
     width: 55px;
     padding: 8px;
     left: 0;
+    top: 0;
     transform: translateX(-100%);
     background-color: var(--main-color);
     border-radius: 15px 0 0 15px;
-    max-height: calc(100% - 10px);
+    max-height: calc(100%);
     overflow: auto;
     height: 100%;
     border-right: 1px solid white;
@@ -194,4 +195,62 @@ input::-webkit-slider-thumb:hover{
 .playing{
     background-color: rgba(255,255,255, 0.85);
     border-radius: 4px;
+}
+
+.addSongField{
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1;
+    padding: 5px;
+    background-color: white;
+    border-left: 2px solid var(--main-color);
+    border-right: 2px solid var(--main-color);
+}
+
+.addSongField > div{
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.addSongField label{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 50%;
+}
+
+.addSongField input{
+    width: 90%;
+}
+
+#addSongBtn{
+    display: block;
+}
+
+.adding-controls{
+    justify-content: space-evenly;
+}
+
+.openAddingField{
+    display: flex;
+    justify-content: center;
+    padding: 5px 0;
+}
+
+.openAddingField:hover{
+    background-color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.openAddingField img{
+    max-width: 15px;
+}
+
+.open{
+    display: block;
 }
