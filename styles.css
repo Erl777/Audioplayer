@@ -25,7 +25,7 @@ body{
 .playlist{
     position: relative;
     padding: 5px 10px 10px 10px;
-    min-height: 150px;
+    min-height: 250px;
 }
 
 .playlists{
@@ -232,6 +232,7 @@ input::-webkit-slider-thumb:hover{
 }
 
 .adding-controls{
+    display: flex;
     justify-content: space-evenly;
 }
 
@@ -252,5 +253,48 @@ input::-webkit-slider-thumb:hover{
 }
 
 .open{
-    display: block;
+    display: block !important;
+}
+
+.openNewPlaylistField{
+    display: flex;
+    justify-content: center;
+    margin-bottom: 5px;
+    padding: 5px 0;
+}
+
+.openNewPlaylistField > img{
+    max-width: 50%;
+}
+
+.hover-base:hover{
+    background-color: rgba(255,255,255, 0.85);
+    border-radius: 4px;
+}
+
+.hover-rgba:hover{
+    background-color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.addPlaylistField{
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1;
+    padding: 5px;
+    background-color: white;
+    border-left: 2px solid var(--main-color);
+    border-right: 2px solid var(--main-color);
+}
+
+.addPlaylistField label{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
 }

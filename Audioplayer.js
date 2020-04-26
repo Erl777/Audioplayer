@@ -84,6 +84,9 @@ class Audioplayer {
         document.getElementById('addSongBtnClose').addEventListener('click', this.toggleAddingField);
         document.getElementById('addSongBtn').addEventListener('click', this.addNewSongToPlaylist);
 
+        document.getElementById('openNewPlaylistField').addEventListener('click', this.toggleAddingPlaylistField);
+        document.getElementById('addPlaylistBtnClose').addEventListener('click', this.toggleAddingPlaylistField);
+        document.getElementById('addPlaylistBtn').addEventListener('click', this.addNewPlaylist);
 
 
     }
@@ -249,7 +252,10 @@ class Audioplayer {
         this.generatePlaylist(this.settings.playlist[data]);
         document.getElementById('playlist').dataset.playlistName = data;
         this.refreshEventListeners();
-        this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
+        if (this.song.duration > 0 && !this.song.paused) {
+            this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
+        }
+
     };
 
     refreshEventListeners(){
@@ -290,6 +296,40 @@ class Audioplayer {
     }
 
     /* --------------------------------------------- */
+
+    addNewPlaylist = () => {
+        let playlistNameInput = document.getElementById('newPlaylistName');
+        let playlistName = playlistNameInput.value;
+
+        if( playlistName !== ''){
+
+            this.settings.playlist[playlistName] = [];
+
+            // Очистка интутов после добавления
+            playlistNameInput.value = '';
+        }
+        else {
+            alert('что-то не заполненно');
+        }
+
+        console.log(this.settings.playlist);
+        this.generatePlaylists();
+        this.refreshPlaylistsEventListeners();
+
+    };
+
+    refreshPlaylistsEventListeners(){
+        document.getElementById('openNewPlaylistField').addEventListener('click', this.toggleAddingPlaylistField);
+        let playlistsArr = document.querySelector('.playlists').querySelectorAll('div[data-playlist-item]');
+        for(let i = 0; i < playlistsArr.length; i++){
+            playlistsArr[i].addEventListener('click', this.changePlaylist);
+        }
+    }
+
+    toggleAddingPlaylistField(){
+        let window = document.getElementById('addPlaylistField');
+        window.classList.toggle('open');
+    }
 
     toggleAddingField(){
         let window = document.getElementById('addSongField');
@@ -442,8 +482,6 @@ class Audioplayer {
 
     }
 
-    /* Готовые функции(не требующие изменения и не вызыващие подозрений) */
-
     getSongName(){
         let playlistName = this.getShownPlaylistName();
         let elem = document.getElementById('trackName');
@@ -453,8 +491,13 @@ class Audioplayer {
     /* Свежие */
 
     generatePlaylists(){
+        // В этой функции генерирутся и вставляются в разметку блоки с плейлистами
         let playlistsContainer = document.querySelector('.playlists');
         let playlistsNamesArr = Object.keys(this.settings.playlist);
+        // этот элемент - плюс для добавления нового плейлиста
+        playlistsContainer.innerHTML = `<div class="openNewPlaylistField hover-rgba" id="openNewPlaylistField">
+                    <img class="img-relative" src="img/plus.svg" alt="">
+                </div>`;
 
         let playlistElem = '';
 
@@ -466,7 +509,6 @@ class Audioplayer {
 
             playlistsContainer.innerHTML += playlistElem;
         }
-
 
     }
 
