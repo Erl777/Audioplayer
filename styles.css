@@ -190,3 +190,8 @@ input::-webkit-slider-thumb:hover{
 .ready{
     text-decoration: line-through;
 }
+
+.playing{
+    background-color: rgba(255,255,255, 0.85);
+    border-radius: 4px;
+}

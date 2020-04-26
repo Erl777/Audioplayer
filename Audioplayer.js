@@ -28,6 +28,7 @@ class Audioplayer {
         this.timer = null;
         this.playlistContainer = document.getElementById('playlist');
         this.playlistsList = null;
+        this.playingPlaylist = Object.keys(this.settings.playlist)[0];
 
         // console.log(this.settings);
         //this.checkErrors();
@@ -72,6 +73,7 @@ class Audioplayer {
         if(songList.length > 0){
             for(let i=0; i < songList.length; i++){
                 songList[i].addEventListener('click', this.nextSongFromPlaylist);
+                songList[i].addEventListener('click', this.highlightPlayingSong);
             }
         }
 
@@ -135,16 +137,20 @@ class Audioplayer {
     startPlay = () => {
 
         if(this.song.paused ){
-            console.log('условие is paused');
+            //console.log('условие is paused');
             this.song.play();
             this.countTime();
             this.newTimeReduction();
             this.getSongName();
             this.input.max = parseInt(this.song.duration);
+
+            // подсветка текущего трека
+            this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
+
         }
 
         this.song.oncanplay = () => {
-            console.log('обычное условие');
+            //console.log('обычное условие');
             this.countTime();
             this.newTimeReduction();
             this.input.max = parseInt(this.song.duration);
@@ -153,6 +159,13 @@ class Audioplayer {
 
 
     };
+
+    getCurrentPlayingSongDOMElem(){
+        if( this.getShownPlaylistName() === this.playingPlaylist ){
+            let songsArr = document.querySelector(`ol[data-playlist-name=${this.playingPlaylist}]`).querySelectorAll(`li[data-song-id]`);
+            return  songsArr[this.id];
+        }
+    }
 
     getShownPlaylistName(){
         return this.playlistContainer.dataset.playlistName;
@@ -177,7 +190,7 @@ class Audioplayer {
             this.input.value = 0;
             this.id++;
             this.changeSrcInAudioElem(this.settings.playlist[playlistName], this.id);
-
+            this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
         }
 
     };
@@ -197,6 +210,11 @@ class Audioplayer {
         this.id = songId;
 
         this.changeSrcInAudioElem(this.settings.playlist[playlistName], songId);
+
+        if(this.playingPlaylist != this.getShownPlaylistName()){
+            this.changePlayingPlaylist();
+        }
+
 
     };
 
@@ -226,6 +244,7 @@ class Audioplayer {
         this.generatePlaylist(this.settings.playlist[data]);
         document.getElementById('playlist').dataset.playlistName = data;
         this.refreshEventListeners();
+        this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
     };
 
     refreshEventListeners(){
@@ -255,7 +274,7 @@ class Audioplayer {
         let time = document.getElementById('song-duration');
         // при переклчении межу песнями выводило NaN значение. Код ниже это исправляет
         if(!this.song.duration) {
-            console.log('song is not loaded yet');
+            //console.log('song is not loaded yet');
             time.textContent = '00:00';
         }
         else {
@@ -266,6 +285,34 @@ class Audioplayer {
     }
 
     /* --------------------------------------------- */
+
+    changePlayingPlaylist(){
+        // изменение игращего плейлиста
+        this.playingPlaylist = this.playlistContainer.dataset.playlistName;
+    }
+
+    highlightPlayingSong = (event, song ) => {
+        // очистка всех элементов с классом playing
+        this.clearPlayingSongs();
+        // добавление класса playing при условии, что нажали на песню
+        if(song !== undefined && song.classList.contains('song')){
+            song.classList.add('playing');
+        }
+        else {
+            if(event.target.classList.contains('song')){
+                event.target.classList.add('playing');
+            }
+        }
+
+    };
+
+    clearPlayingSongs(){
+        // очистка всех элементов с классом playing
+        let playingSongs = document.querySelectorAll('.playing');
+        for (let i = 0; i< playingSongs.length; i++){
+            playingSongs[i].classList.remove('playing');
+        }
+    }
 
     checkSongCondition(){
         console.log('Состояние песни = ' + this.song.readyState);
@@ -285,16 +332,13 @@ class Audioplayer {
     }
 
     setTime = () =>{
-        // this.input.value = parseInt(this.song.currentTime, 10);
         if(this.song.ended){
             this.nextSong();
         }
-        // if(this.song.ended && this.id === this.audiolist.length) clearInterval(this.timer);
     };
 
     chooseValue = () => {
       this.song.removeEventListener('timeupdate', this.setTime);
-      //console.log('this.timer id = ' + this.timer);
       clearInterval(this.timer);
     };
 
@@ -355,7 +399,7 @@ class Audioplayer {
 
     }
 
-    /* Готовые функциит(не требующие изменения и не вызыващие подозрений) */
+    /* Готовые функции(не требующие изменения и не вызыващие подозрений) */
 
     getSongName(){
         let playlistName = this.getShownPlaylistName();
