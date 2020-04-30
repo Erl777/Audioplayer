@@ -12,8 +12,6 @@
 
     <div class="container gradient">
 
-<!--        <img class="cover" src="images/cover.jpg" alt="">-->
-
         <div class="player controls">
 
             <div class="buttons">
@@ -106,10 +104,19 @@
 
             </div>
 
-            <ol id="playlist" data-playlist-name="default">
+            <div id="playlist" data-playlist-name="default">
 
-            </ol>
+            </div>
         </div>
+
+        <div class="modal-overlay">
+            <div class="modal" id="redactSong">
+                <p>Измените название песни</p>
+                <input type="text" id="redactSongNameInput">
+                <button type="button" id="redactSongNameBtn">Готово</button>
+            </div>
+        </div>
+
 
     </div><!-- / Container-->
 
@@ -134,6 +141,10 @@
         <li class="ready"> подсветка активной песни </li>
         <li class="ready"> добавление песни в плейлист </li>
         <li class="ready"> добавление плейлиста </li>
+        <hr>
+        <li class="ready">пределать список в блоки под будущий функционал</li>
+        <li class="ready"> редактировать </li>
+        <li class="ready"> удалить </li>
 
     </ul>
 

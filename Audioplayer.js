@@ -30,6 +30,10 @@ class Audioplayer {
         this.playlistsList = null;
         this.playingPlaylist = Object.keys(this.settings.playlist)[0];
         this.addSongField = document.getElementById('addSongField');
+        this.redactInput = document.getElementById('redactSongNameInput');
+        this.redactSongNameBtn = document.getElementById('redactSongNameBtn');
+        this.modalOverlay = document.querySelector('.modal-overlay');
+        this.redactingSongId = null;
 
         // console.log(this.settings);
         //this.checkErrors();
@@ -70,7 +74,7 @@ class Audioplayer {
             }
         }
 
-        let songList = document.querySelectorAll('li[data-song-id]');
+        let songList = document.querySelectorAll('div[data-song-id]');
         if(songList.length > 0){
             for(let i=0; i < songList.length; i++){
                 songList[i].addEventListener('click', this.nextSongFromPlaylist);
@@ -88,27 +92,39 @@ class Audioplayer {
         document.getElementById('addPlaylistBtnClose').addEventListener('click', this.toggleAddingPlaylistField);
         document.getElementById('addPlaylistBtn').addEventListener('click', this.addNewPlaylist);
 
+        let deleteElementsArr = this.playlistContainer.querySelectorAll('.delete');
+        if(deleteElementsArr.length > 0){
+            for(let i=0; i < deleteElementsArr.length; i++){
+                deleteElementsArr[i].addEventListener('click', this.deleteSongFromPlaylist);
+            }
+        }
+
+        let redactElementsArr = this.playlistContainer.querySelectorAll('.edit');
+        if(redactElementsArr.length > 0){
+            for(let i=0; i < redactElementsArr.length; i++){
+                redactElementsArr[i].addEventListener('click', this.openEditingSongName);
+            }
+        }
+
+        this.redactSongNameBtn.addEventListener('click', this.closeModalAndSaveNewSongName);
 
     }
 
     addAudioElem(){
-        //console.log(this.settings.playlist);
         this.player.appendChild(this.song).setAttribute('id', 'track');
     }
 
     createAudioElem(){
 
-        //console.log(this.settings.playlist);
         let firstSong;
         let firstArr;
         for (var i in this.settings.playlist) {
             firstArr = this.settings.playlist[i];
             break;
         }
-        //console.log(firstArr);
 
         if(firstArr === undefined){
-            let str = '<li> В плейлисте нет песен </li>';
+            let str = '<p> В плейлисте нет песен </p>';
             this.playlistContainer.innerHTML = str;
         }
         else {
@@ -125,18 +141,54 @@ class Audioplayer {
     }
 
     generatePlaylist(arr){
-        //console.log(arr);
-        //let arr = this.getFirstArrFromPlaylist();
         let playlist = '';
         for (let i = 0; i < arr.length; i++){
             let elemName = arr[i].name;
             let fullTime = arr[i].fullTime;
-            let string = `<li class="song" data-song-id="${i}"> ${elemName} <span> ${fullTime} </span></li>`;
+            let string = `<div class="song hover-base" data-song-id="${i}"> ${elemName} 
+                            <div class='actions'>
+                            
+                                <div class="img-container edit">
+                                    <img class="edit" src="img/edit-tools.svg" alt="" title="Редактировать">
+                                </div>
+                                <div class="img-container delete">
+                                    <img class="delete" src="img/send-to-trash.svg" alt="" title="Удалить">
+                                </div>
+                                
+                            </div> 
+                            <span class="song-time"> ${fullTime} </span>
+                          </div>`;
             playlist += string;
         }
         this.addPlaylistToPage(playlist);
 
     }
+
+    deleteSongFromPlaylist = (e) => {
+        e.stopPropagation();
+        let songId = e.target.closest('.song').dataset.songId;
+        delete this.settings.playlist[this.getShownPlaylistName()][songId];
+        // после удаления объекта из массива фильтрую массив на отброс пустых элементов
+        this.settings.playlist[this.getShownPlaylistName()] = this.settings.playlist[this.getShownPlaylistName()].filter(element => element !== null);
+        this.generatePlaylist(this.settings.playlist[this.getShownPlaylistName()]);
+        this.refreshEventListeners();
+        this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
+    };
+
+    openEditingSongName = (e) => {
+        e.stopPropagation();
+        this.redactingSongId = e.target.closest('.song').dataset.songId;
+        this.redactInput.value = this.settings.playlist[this.getShownPlaylistName()][this.redactingSongId].name;
+        this.modalOverlay.classList.add('d-flex');
+    };
+
+    closeModalAndSaveNewSongName = () => {
+        this.settings.playlist[this.getShownPlaylistName()][this.redactingSongId].name = this.redactInput.value;
+        this.generatePlaylist(this.settings.playlist[this.getShownPlaylistName()]);
+        this.refreshEventListeners();
+        this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
+        this.modalOverlay.classList.remove('d-flex');
+    };
 
     addPlaylistToPage (list) {
         this.playlistContainer.innerHTML = list;
@@ -170,7 +222,7 @@ class Audioplayer {
 
     getCurrentPlayingSongDOMElem(){
         if( this.getShownPlaylistName() === this.playingPlaylist ){
-            let songsArr = document.querySelector(`ol[data-playlist-name=${this.playingPlaylist}]`).querySelectorAll(`li[data-song-id]`);
+            let songsArr = document.querySelector(`div[data-playlist-name=${this.playingPlaylist}]`).querySelectorAll(`div[data-song-id]`);
             return  songsArr[this.id];
         }
     }
@@ -259,10 +311,26 @@ class Audioplayer {
     };
 
     refreshEventListeners(){
-        let songArr = document.getElementById('playlist').querySelectorAll('li[data-song-id]');
+        // обновление прослушивателей на воспроизведение песни по нажатию на нее
+        let songArr = document.getElementById('playlist').querySelectorAll('div[data-song-id]');
         for(let i = 0; i < songArr.length; i++){
             songArr[i].addEventListener('click', this.nextSongFromPlaylist);
         }
+        // обновление прослушивателей на кнопку удалить
+        let deleteElementsArr = this.playlistContainer.querySelectorAll('.delete');
+        if(deleteElementsArr.length > 0){
+            for(let i=0; i < deleteElementsArr.length; i++){
+                deleteElementsArr[i].addEventListener('click', this.deleteSongFromPlaylist);
+            }
+        }
+        // обновление прослушивателей на кнопку редактировать
+        let redactElementsArr = this.playlistContainer.querySelectorAll('.edit');
+        if(redactElementsArr.length > 0){
+            for(let i=0; i < redactElementsArr.length; i++){
+                redactElementsArr[i].addEventListener('click', this.openEditingSongName);
+            }
+        }
+
     }
 
     stopPlay = () =>{
@@ -365,7 +433,6 @@ class Audioplayer {
         else {
             alert('что-то не заполненно');
         }
-        console.log(this.settings.playlist[this.getShownPlaylistName()]);
 
     };
 

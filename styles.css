@@ -270,6 +270,7 @@ input::-webkit-slider-thumb:hover{
 .hover-base:hover{
     background-color: rgba(255,255,255, 0.85);
     border-radius: 4px;
+    cursor: pointer;
 }
 
 .hover-rgba:hover{
@@ -297,4 +298,81 @@ input::-webkit-slider-thumb:hover{
     align-items: center;
     width: 100%;
     margin-bottom: 10px;
+}
+
+.song{
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+}
+
+.song:hover .actions{
+    display: flex;
+}
+
+.actions{
+    margin-left: auto;
+    margin-right: 10px;
+    display: none;
+}
+
+.actions .img-container{
+    max-width: 15px;
+    margin-right: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.actions .img-container:last-child{
+    margin-right: 0;
+}
+
+.actions .img-container:hover{
+    cursor: default;
+}
+
+.edit, .delete{
+    max-width: 100%;
+    min-width: 15px;
+}
+
+.song-time{
+    min-width: 45px;
+}
+
+  /*Modal*/
+
+.modal-overlay{
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0, 0.5);
+    z-index: 10;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal{
+    background-color: var(--main-color);
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.modal p{
+    text-align: center;
+    margin: 0 0 5px 0;
+}
+
+.modal input{
+    width: 220px;
+}
+
+.d-flex{
+    display: flex !important;
 }
