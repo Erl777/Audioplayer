@@ -34,19 +34,22 @@ class Audioplayer {
         this.redactSongNameBtn = document.getElementById('redactSongNameBtn');
         this.modalOverlay = document.querySelector('.modal-overlay');
         this.redactingSongId = null;
-
+        this.templates = {
+            song: '',
+            playlist: ''
+        };
         // console.log(this.settings);
         //this.checkErrors();
         this.generatePlaylist(this.getFirstArrFromPlaylist());
 
-        // попытка создать свое событие:
-        var event = new Event('build');
-        // Подписываемся на событие
-        document.addEventListener('build', function (e) { console.log('builded') }, false);
-        // Вызываем событие
-        document.dispatchEvent(event);
+        this.events = ['addSongToPlaylist', 'deleteSong', 'changeSongName' , 'addPlaylist', 'deletePlaylist'];
 
         this.initialization();
+    }
+
+    on(evName, handler){
+        this.events[evName] = new Event(evName);
+        document.addEventListener(evName, handler, false);
     }
 
     initialization (){
@@ -129,6 +132,8 @@ class Audioplayer {
         if (playlistName === this.getShownPlaylistName() ){
             this.playlistContainer.innerHTML = '';
         }
+        // Event
+        document.dispatchEvent(this.events['deletePlaylist']);
     }
 
     addAudioElem(){
@@ -207,7 +212,8 @@ class Audioplayer {
         if(reloadPlaylist === 'reload' || reloadPlaylist === true){
             this.reloadShownPlaylist();
         }
-
+        // Event
+        document.dispatchEvent(this.events['deleteSong']);
     }
 
     openEditingSongName = (e) => {
@@ -229,6 +235,8 @@ class Audioplayer {
         if(reloadPlaylist === 'reload' || reloadPlaylist === true){
             this.reloadShownPlaylist();
         }
+        // Event
+        document.dispatchEvent(this.events['changeSongName']);
     }
 
     addPlaylistToPage (list) {
@@ -419,6 +427,8 @@ class Audioplayer {
         if(reloadPlaylists === 'reload' || reloadPlaylists === true){
             this.reloadPlaylists();
         }
+        // Event
+        document.dispatchEvent(this.events['addPlaylist']);
     }
 
     reloadPlaylists(){
@@ -630,6 +640,8 @@ class Audioplayer {
         else {
             alert('что-то не заполненно');
         }
+        // Event
+        document.dispatchEvent(this.events['addSongToPlaylist']);
     };
 
     reloadShownPlaylist(){
@@ -719,3 +731,19 @@ let Au = new Audioplayer({
 //Au.deletePlaylist('default');
 
 //Au.saveNewSongName('default', 'AC/DC', 2, true);
+
+Au.on('addSongToPlaylist', function () {
+    console.log('добавили новую песню');
+});
+Au.on('deleteSong', function () {
+    console.log('удалили песню');
+});
+Au.on('changeSongName', function () {
+    console.log('изменили песню');
+});
+Au.on('addPlaylist', function () {
+    console.log('добавили плейлист');
+});
+Au.on('deletePlaylist', function () {
+    console.log('удалили плейлист');
+});
