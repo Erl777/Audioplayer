@@ -39,6 +39,13 @@ class Audioplayer {
         //this.checkErrors();
         this.generatePlaylist(this.getFirstArrFromPlaylist());
 
+        // попытка создать свое событие:
+        var event = new Event('build');
+        // Подписываемся на событие
+        document.addEventListener('build', function (e) { console.log('builded') }, false);
+        // Вызываем событие
+        document.dispatchEvent(event);
+
         this.initialization();
     }
 
@@ -86,28 +93,42 @@ class Audioplayer {
 
         document.getElementById('openAddingField').addEventListener('click', this.toggleAddingField);
         document.getElementById('addSongBtnClose').addEventListener('click', this.toggleAddingField);
-        document.getElementById('addSongBtn').addEventListener('click', this.addNewSongToPlaylist);
+        document.getElementById('addSongBtn').addEventListener('click', this.dataFromAddSongField);
 
         document.getElementById('openNewPlaylistField').addEventListener('click', this.toggleAddingPlaylistField);
         document.getElementById('addPlaylistBtnClose').addEventListener('click', this.toggleAddingPlaylistField);
-        document.getElementById('addPlaylistBtn').addEventListener('click', this.addNewPlaylist);
+        document.getElementById('addPlaylistBtn').addEventListener('click', this.dataFromAddPlaylistField);
 
-        let deleteElementsArr = this.playlistContainer.querySelectorAll('.delete');
-        if(deleteElementsArr.length > 0){
-            for(let i=0; i < deleteElementsArr.length; i++){
-                deleteElementsArr[i].addEventListener('click', this.deleteSongFromPlaylist);
-            }
-        }
-
-        let redactElementsArr = this.playlistContainer.querySelectorAll('.edit');
-        if(redactElementsArr.length > 0){
-            for(let i=0; i < redactElementsArr.length; i++){
-                redactElementsArr[i].addEventListener('click', this.openEditingSongName);
-            }
-        }
+        this.addEventsToArrOfElems('.delete', 'click', this.getSongIdAndStartDeleting);
+        this.addEventsToArrOfElems('.edit', 'click', this.openEditingSongName);
 
         this.redactSongNameBtn.addEventListener('click', this.closeModalAndSaveNewSongName);
 
+    }
+
+    addEventsToArrOfElems(select, event, funcName){
+        let Arr = this.playlistContainer.querySelectorAll(select);
+        if(Arr.length > 0){
+            for(let i=0; i < Arr.length; i++){
+                Arr[i].addEventListener(event, funcName);
+            }
+        }
+    }
+
+    playlistInfo = (e) => {
+        e.stopPropagation();
+        let list = e.target.closest('.list');
+        let listName = list.dataset.playlistItem;
+        this.deletePlaylist(listName);
+    };
+
+    deletePlaylist(playlistName){
+        delete  this.settings.playlist[playlistName];
+        this.reloadPlaylists();
+        // проверка на то открыт ли текущий плейлист, если да, то очистить его
+        if (playlistName === this.getShownPlaylistName() ){
+            this.playlistContainer.innerHTML = '';
+        }
     }
 
     addAudioElem(){
@@ -164,31 +185,51 @@ class Audioplayer {
 
     }
 
-    deleteSongFromPlaylist = (e) => {
+    getShownPlaylist(){
+        return this.settings.playlist[this.getShownPlaylistName()];
+    }
+
+    getPlaylistByName = (name) => {
+        return this.settings.playlist[name];
+    };
+
+    getSongIdAndStartDeleting = (e) => {
         e.stopPropagation();
         let songId = e.target.closest('.song').dataset.songId;
-        delete this.settings.playlist[this.getShownPlaylistName()][songId];
-        // после удаления объекта из массива фильтрую массив на отброс пустых элементов
-        this.settings.playlist[this.getShownPlaylistName()] = this.settings.playlist[this.getShownPlaylistName()].filter(element => element !== null);
-        this.generatePlaylist(this.settings.playlist[this.getShownPlaylistName()]);
-        this.refreshEventListeners();
-        this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
+        this.deleteSongFromPlaylist(this.getShownPlaylistName(), songId, true);
     };
+
+    deleteSongFromPlaylist(playlistName, songId, reloadPlaylist ){
+        delete this.getPlaylistByName(playlistName)[songId];
+        // после удаления объекта из массива фильтрую массив на отброс пустых элементов
+        this.settings.playlist[playlistName] = this.getPlaylistByName(playlistName).filter(element => element !== null);
+
+        if(reloadPlaylist === 'reload' || reloadPlaylist === true){
+            this.reloadShownPlaylist();
+        }
+
+    }
 
     openEditingSongName = (e) => {
         e.stopPropagation();
         this.redactingSongId = e.target.closest('.song').dataset.songId;
-        this.redactInput.value = this.settings.playlist[this.getShownPlaylistName()][this.redactingSongId].name;
+        this.redactInput.value = this.getShownPlaylist()[this.redactingSongId].name;
         this.modalOverlay.classList.add('d-flex');
     };
 
     closeModalAndSaveNewSongName = () => {
-        this.settings.playlist[this.getShownPlaylistName()][this.redactingSongId].name = this.redactInput.value;
-        this.generatePlaylist(this.settings.playlist[this.getShownPlaylistName()]);
-        this.refreshEventListeners();
-        this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
+
+        this.saveNewSongName(this.getShownPlaylistName(), this.redactInput.value, this.redactingSongId, true);
         this.modalOverlay.classList.remove('d-flex');
     };
+
+    saveNewSongName(playlistName , songName, songId, reloadPlaylist){
+        let playlist = this.settings.playlist[playlistName];
+        playlist[songId].name = songName;
+        if(reloadPlaylist === 'reload' || reloadPlaylist === true){
+            this.reloadShownPlaylist();
+        }
+    }
 
     addPlaylistToPage (list) {
         this.playlistContainer.innerHTML = list;
@@ -201,7 +242,7 @@ class Audioplayer {
             this.song.play();
             this.countTime();
             this.newTimeReduction();
-            this.getSongName();
+            // this.getSongName();
             this.input.max = parseInt(this.song.duration);
 
             // подсветка текущего трека
@@ -317,19 +358,9 @@ class Audioplayer {
             songArr[i].addEventListener('click', this.nextSongFromPlaylist);
         }
         // обновление прослушивателей на кнопку удалить
-        let deleteElementsArr = this.playlistContainer.querySelectorAll('.delete');
-        if(deleteElementsArr.length > 0){
-            for(let i=0; i < deleteElementsArr.length; i++){
-                deleteElementsArr[i].addEventListener('click', this.deleteSongFromPlaylist);
-            }
-        }
+        this.addEventsToArrOfElems('.delete', 'click', this.getSongIdAndStartDeleting);
         // обновление прослушивателей на кнопку редактировать
-        let redactElementsArr = this.playlistContainer.querySelectorAll('.edit');
-        if(redactElementsArr.length > 0){
-            for(let i=0; i < redactElementsArr.length; i++){
-                redactElementsArr[i].addEventListener('click', this.openEditingSongName);
-            }
-        }
+        this.addEventsToArrOfElems('.edit', 'click', this.openEditingSongName);
 
     }
 
@@ -365,13 +396,14 @@ class Audioplayer {
 
     /* --------------------------------------------- */
 
-    addNewPlaylist = () => {
+    dataFromAddPlaylistField = () => {
         let playlistNameInput = document.getElementById('newPlaylistName');
         let playlistName = playlistNameInput.value;
 
         if( playlistName !== ''){
 
-            this.settings.playlist[playlistName] = [];
+            //this.settings.playlist[playlistName] = [];
+            this.addNewPlaylist(playlistName, true);
 
             // Очистка интутов после добавления
             playlistNameInput.value = '';
@@ -380,11 +412,19 @@ class Audioplayer {
             alert('что-то не заполненно');
         }
 
-        console.log(this.settings.playlist);
+    };
+
+    addNewPlaylist(newPlaylistName, reloadPlaylists){
+        this.settings.playlist[newPlaylistName] = [];
+        if(reloadPlaylists === 'reload' || reloadPlaylists === true){
+            this.reloadPlaylists();
+        }
+    }
+
+    reloadPlaylists(){
         this.generatePlaylists();
         this.refreshPlaylistsEventListeners();
-
-    };
+    }
 
     refreshPlaylistsEventListeners(){
         document.getElementById('openNewPlaylistField').addEventListener('click', this.toggleAddingPlaylistField);
@@ -404,34 +444,16 @@ class Audioplayer {
         window.classList.toggle('open');
     }
 
-    addNewSongToPlaylist = () => {
+    dataFromAddSongField = () => {
         let songNameInput = document.getElementById('newSongName');
         let songSrcInput = document.getElementById('newSongSrc');
-        let songDurationInput = document.getElementById('newSongDuration');
         let songName = songNameInput.value;
         let songSrc = songSrcInput.value;
-        let songDuration = songDurationInput.value;
-
-        let newSongObj = {src: songSrc, name: songName, fullTime: songDuration};
-
-        if( songName !== '' && songSrc !== '' && songDuration !== ''){
-
-            // добавление параметров песни в массив с плейлистом
-            this.settings.playlist[this.getShownPlaylistName()].push(newSongObj);
-
-            // Очистка интутов после добавления
-            songNameInput.value = '';
-            songSrcInput.value = '';
-            songDurationInput.value = '';
-
-            // отрисовка плейлиста с новой песней
-            this.generatePlaylist(this.settings.playlist[this.getShownPlaylistName()]);
-            document.getElementById('playlist').dataset.playlistName = this.getShownPlaylistName();
-            this.refreshEventListeners();
-            this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
+        if(songName === ''){
+            songName = songSrc.split('.')[0];
         }
-        else {
-            alert('что-то не заполненно');
+        if( songSrc !== '' ){
+            this.addNewSongToPlaylist(songSrc, this.getShownPlaylistName(), songName, true);
         }
 
     };
@@ -555,8 +577,6 @@ class Audioplayer {
         elem.textContent = this.settings.playlist[playlistName][this.id].name;
     }
 
-    /* Свежие */
-
     generatePlaylists(){
         // В этой функции генерирутся и вставляются в разметку блоки с плейлистами
         let playlistsContainer = document.querySelector('.playlists');
@@ -572,16 +592,57 @@ class Audioplayer {
             playlistElem = `
                 <div class='list' data-playlist-item=${playlistsNamesArr[i]}>
                     <img src='img/playlist1.png' class='responsive' title='${playlistsNamesArr[i]}' alt='playlist icon'>
+                    <span class="delete-playlist-icon js-deletePlaylist">
+                        <img class="delete-icon" src="img/plus.svg" alt="">
+                    </span>
                 </div>`;
 
             playlistsContainer.innerHTML += playlistElem;
         }
 
+        // Добавление событий на иконки удаления плейлстов
+        let Arr = document.querySelectorAll('.js-deletePlaylist');
+        if(Arr.length > 0){
+            for(let i=0; i < Arr.length; i++){
+                Arr[i].addEventListener('click', this.playlistInfo);
+            }
+        }
+
     }
 
+    // New universal methods:
+
+    addNewSongToPlaylist = (songSrc, playlistName, songName, reloadPlaylist) => {
+        let newSongObj = {src: songSrc, name: songName};
+
+        if( playlistName !== '' && songSrc !== ''){
+
+            // console.log(this.getPlaylistByName(playlistName));
+
+            // добавление параметров песни в массив с плейлистом
+            this.getPlaylistByName(playlistName).push(newSongObj);
+
+            if(reloadPlaylist === 'reload' || reloadPlaylist === true){
+                this.reloadShownPlaylist();
+            }
+
+        }
+        else {
+            alert('что-то не заполненно');
+        }
+    };
+
+    reloadShownPlaylist(){
+        //отрисовка плейлиста с новой песней
+        this.generatePlaylist(this.getShownPlaylist());
+        document.getElementById('playlist').dataset.playlistName = this.getShownPlaylistName();
+        this.refreshEventListeners();
+        this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
+    }
+    
 }
 
-new Audioplayer({
+let Au = new Audioplayer({
     playlist: {
 
         default: [
@@ -646,3 +707,15 @@ new Audioplayer({
     nextBtnId: 'nextNew',
     prevBtnId: 'prevNew',
 });
+
+// нужна проверка на наличие вводимого плейлиста
+//Au.addNewSongToPlaylist('music/ljapis_trubeckoj_-_kapital_(zvukoff.ru).mp3', 'default', 'New song');
+// + проверка на наналичие id песни
+//Au.deleteSongFromPlaylist('default', 2, true);
+
+//Au.addNewPlaylist('mySongs', true);
+//Au.addNewSongToPlaylist('music/ljapis_trubeckoj_-_kapital_(zvukoff.ru).mp3', 'mySongs', 'New song');
+
+//Au.deletePlaylist('default');
+
+//Au.saveNewSongName('default', 'AC/DC', 2, true);

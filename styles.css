@@ -20,6 +20,7 @@ body{
     flex-direction: column;
     background-color: var(--main-color);
     border-radius: 15px 15px 15px 0 ;
+    min-width: 460px;
 }
 
 .playlist{
@@ -45,6 +46,7 @@ body{
 }
 
 .list{
+    position: relative;
     margin-bottom: 5px;
 }
 
@@ -189,6 +191,7 @@ input::-webkit-slider-thumb:hover{
 }
 
 .ready{
+    display: none;
     text-decoration: line-through;
 }
 
@@ -375,4 +378,29 @@ input::-webkit-slider-thumb:hover{
 
 .d-flex{
     display: flex !important;
+}
+
+.list:hover .delete-playlist-icon{
+    display: flex;
+}
+
+.delete-playlist-icon{
+    position: absolute;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    width: 15px;
+    right: -3px;
+    height: 15px;
+    background-color: white;
+    top: -3px;
+    border-radius: 50%;
+}
+
+.delete-playlist-icon:hover{
+    cursor: default;
+}
+.delete-icon{
+    max-width: 60%;
+    transform: rotate(45deg);
 }
