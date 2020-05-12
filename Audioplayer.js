@@ -29,16 +29,36 @@ class Audioplayer {
         this.playlistContainer = document.getElementById('playlist');
         this.playlistsList = null;
         this.playingPlaylist = Object.keys(this.settings.playlist)[0];
-        this.addSongField = document.getElementById('addSongField');
         this.redactInput = document.getElementById('redactSongNameInput');
         this.redactSongNameBtn = document.getElementById('redactSongNameBtn');
         this.modalOverlay = document.querySelector('.modal-overlay');
         this.redactingSongId = null;
         this.templates = {
-            song: '',
-            playlist: ''
+            song: `<div class="song hover-base" data-song-id="{i}"> {elemName} 
+                            <div class='actions'>
+                            
+                                <div class="img-container edit">
+                                    <img class="edit" src="img/edit-tools.svg" alt="" title="Редактировать">
+                                </div>
+                                <div class="img-container delete">
+                                    <img class="delete" src="img/send-to-trash.svg" alt="" title="Удалить">
+                                </div>
+                                
+                            </div> 
+                            <span class="song-time"> {fullTime} </span>
+                          </div>`,
+            playlist: `
+                <div class='list' data-playlist-item={playlistsNamesArr[i]}>
+                    <img src='img/playlist1.png' class='responsive' title='{playlistsNamesArr[i]}' alt='playlist icon'>
+                    <span class="delete-playlist-icon js-deletePlaylist">
+                        <img class="delete-icon" src="img/plus.svg" alt="">
+                    </span>
+                </div>`,
+            addPlaylist: `
+                    <div class="openNewPlaylistField hover-rgba" id="openNewPlaylistField">
+                        <img class="img-relative" src="img/plus.svg" alt="">
+                    </div>`
         };
-        // console.log(this.settings);
         //this.checkErrors();
         this.generatePlaylist(this.getFirstArrFromPlaylist());
 
@@ -126,14 +146,16 @@ class Audioplayer {
     };
 
     deletePlaylist(playlistName){
-        delete  this.settings.playlist[playlistName];
-        this.reloadPlaylists();
-        // проверка на то открыт ли текущий плейлист, если да, то очистить его
-        if (playlistName === this.getShownPlaylistName() ){
-            this.playlistContainer.innerHTML = '';
+        if(this.checkingForAvailabilityPlaylist(playlistName)){
+            delete  this.settings.playlist[playlistName];
+            this.reloadPlaylists();
+            // проверка на то открыт ли текущий плейлист, если да, то очистить его
+            if (playlistName === this.getShownPlaylistName() ){
+                this.playlistContainer.innerHTML = '<p class="text-center"> В плейлисте нет песен </p>';
+            }
+            // Event
+            document.dispatchEvent(this.events['deletePlaylist']);
         }
-        // Event
-        document.dispatchEvent(this.events['deletePlaylist']);
     }
 
     addAudioElem(){
@@ -150,8 +172,7 @@ class Audioplayer {
         }
 
         if(firstArr === undefined){
-            let str = '<p> В плейлисте нет песен </p>';
-            this.playlistContainer.innerHTML = str;
+            this.playlistContainer.innerHTML = '<p> В плейлисте нет песен </p>';
         }
         else {
             firstSong = firstArr[0].src;
@@ -171,19 +192,9 @@ class Audioplayer {
         for (let i = 0; i < arr.length; i++){
             let elemName = arr[i].name;
             let fullTime = arr[i].fullTime;
-            let string = `<div class="song hover-base" data-song-id="${i}"> ${elemName} 
-                            <div class='actions'>
-                            
-                                <div class="img-container edit">
-                                    <img class="edit" src="img/edit-tools.svg" alt="" title="Редактировать">
-                                </div>
-                                <div class="img-container delete">
-                                    <img class="delete" src="img/send-to-trash.svg" alt="" title="Удалить">
-                                </div>
-                                
-                            </div> 
-                            <span class="song-time"> ${fullTime} </span>
-                          </div>`;
+            // постановка переменных в шаблон
+            let string = this.templates.song.replace('{i}', i).replace('{elemName}', elemName).replace('{fullTime}', fullTime);
+
             playlist += string;
         }
         this.addPlaylistToPage(playlist);
@@ -205,15 +216,21 @@ class Audioplayer {
     };
 
     deleteSongFromPlaylist(playlistName, songId, reloadPlaylist ){
-        delete this.getPlaylistByName(playlistName)[songId];
-        // после удаления объекта из массива фильтрую массив на отброс пустых элементов
-        this.settings.playlist[playlistName] = this.getPlaylistByName(playlistName).filter(element => element !== null);
 
-        if(reloadPlaylist === 'reload' || reloadPlaylist === true){
-            this.reloadShownPlaylist();
+        let alertQuestion = confirm(`Вы действительно хотите удалить песню ${this.settings.playlist[playlistName][songId].name}`);
+
+        if(alertQuestion){
+            delete this.getPlaylistByName(playlistName)[songId];
+            // после удаления объекта из массива фильтрую массив на отброс пустых элементов
+            this.settings.playlist[playlistName] = this.getPlaylistByName(playlistName).filter(element => element !== null);
+
+            if(reloadPlaylist === 'reload' || reloadPlaylist === true){
+                this.reloadShownPlaylist();
+            }
+            // Event
+            document.dispatchEvent(this.events['deleteSong']);
         }
-        // Event
-        document.dispatchEvent(this.events['deleteSong']);
+
     }
 
     openEditingSongName = (e) => {
@@ -337,13 +354,6 @@ class Audioplayer {
             this.changeSrcInAudioElem(this.settings.playlist[playlistName], this.id);
             this.song.currentTime = 0;
             this.input.max = this.song.duration;
-            // this.countTime();
-            // this.restartTimer();
-            // this.getSongName();
-            // this.song.play();
-        }
-        if(this.timer === false){
-            // this.timeReduction();
         }
 
     };
@@ -592,20 +602,13 @@ class Audioplayer {
         let playlistsContainer = document.querySelector('.playlists');
         let playlistsNamesArr = Object.keys(this.settings.playlist);
         // этот элемент - плюс для добавления нового плейлиста
-        playlistsContainer.innerHTML = `<div class="openNewPlaylistField hover-rgba" id="openNewPlaylistField">
-                    <img class="img-relative" src="img/plus.svg" alt="">
-                </div>`;
+        playlistsContainer.innerHTML = this.templates.addPlaylist;
 
         let playlistElem = '';
 
         for( let i = 0; i < playlistsNamesArr.length; i++ ){
-            playlistElem = `
-                <div class='list' data-playlist-item=${playlistsNamesArr[i]}>
-                    <img src='img/playlist1.png' class='responsive' title='${playlistsNamesArr[i]}' alt='playlist icon'>
-                    <span class="delete-playlist-icon js-deletePlaylist">
-                        <img class="delete-icon" src="img/plus.svg" alt="">
-                    </span>
-                </div>`;
+            // подстановка переменных в шаблон плейлиста
+            playlistElem = this.templates.playlist.replace('{playlistsNamesArr[i]}', playlistsNamesArr[i]).replace('{playlistsNamesArr[i]}', playlistsNamesArr[i]);
 
             playlistsContainer.innerHTML += playlistElem;
         }
@@ -622,26 +625,38 @@ class Audioplayer {
 
     // New universal methods:
 
-    addNewSongToPlaylist = (songSrc, playlistName, songName, reloadPlaylist) => {
-        let newSongObj = {src: songSrc, name: songName};
-
-        if( playlistName !== '' && songSrc !== ''){
-
-            // console.log(this.getPlaylistByName(playlistName));
-
-            // добавление параметров песни в массив с плейлистом
-            this.getPlaylistByName(playlistName).push(newSongObj);
-
-            if(reloadPlaylist === 'reload' || reloadPlaylist === true){
-                this.reloadShownPlaylist();
-            }
-
+    checkingForAvailabilityPlaylist(playlistName){
+        let playlistNames = Object.keys(this.settings.playlist);
+        if( !playlistNames.includes(playlistName) ){
+            console.log(`Плейлист ${playlistName} не существует`);
+            alert(`Плейлист ${playlistName} не существует`);
         }
         else {
-            alert('что-то не заполненно');
+            return true
         }
-        // Event
-        document.dispatchEvent(this.events['addSongToPlaylist']);
+    }
+
+    addNewSongToPlaylist = (songSrc, playlistName, songName, reloadPlaylist) => {
+
+        if(this.checkingForAvailabilityPlaylist(playlistName)){
+            let newSongObj = {src: songSrc, name: songName};
+
+            if( playlistName !== '' && songSrc !== ''){
+
+                // добавление параметров песни в массив с плейлистом
+                this.getPlaylistByName(playlistName).push(newSongObj);
+
+                if(reloadPlaylist === 'reload' || reloadPlaylist === true){
+                    this.reloadShownPlaylist();
+                }
+
+            }
+            else {
+                alert('что-то не заполненно');
+            }
+            // Event
+            document.dispatchEvent(this.events['addSongToPlaylist']);
+        }
     };
 
     reloadShownPlaylist(){
@@ -720,18 +735,6 @@ let Au = new Audioplayer({
     prevBtnId: 'prevNew',
 });
 
-// нужна проверка на наличие вводимого плейлиста
-//Au.addNewSongToPlaylist('music/ljapis_trubeckoj_-_kapital_(zvukoff.ru).mp3', 'default', 'New song');
-// + проверка на наналичие id песни
-//Au.deleteSongFromPlaylist('default', 2, true);
-
-//Au.addNewPlaylist('mySongs', true);
-//Au.addNewSongToPlaylist('music/ljapis_trubeckoj_-_kapital_(zvukoff.ru).mp3', 'mySongs', 'New song');
-
-//Au.deletePlaylist('default');
-
-//Au.saveNewSongName('default', 'AC/DC', 2, true);
-
 Au.on('addSongToPlaylist', function () {
     console.log('добавили новую песню');
 });
@@ -747,3 +750,11 @@ Au.on('addPlaylist', function () {
 Au.on('deletePlaylist', function () {
     console.log('удалили плейлист');
 });
+
+//Au.addNewSongToPlaylist('music/ljapis_trubeckoj_-_kapital_(zvukoff.ru).mp3', 'default', 'New song', true);
+// + проверка на наналичие id песни
+//Au.deleteSongFromPlaylist('default', 2, true);
+//Au.addNewPlaylist('mySongs', true);
+//Au.addNewSongToPlaylist('music/ljapis_trubeckoj_-_kapital_(zvukoff.ru).mp3', 'mySongs', 'New song');
+//Au.deletePlaylist('default');
+//Au.saveNewSongName('default', 'AC/DC', 2, true);

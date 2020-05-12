@@ -404,3 +404,7 @@ input::-webkit-slider-thumb:hover{
     max-width: 60%;
     transform: rotate(45deg);
 }
+
+.text-center{
+    text-align: center;
+}
