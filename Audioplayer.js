@@ -138,6 +138,29 @@ class Audioplayer {
         }
     }
 
+    async getTimeInMinutesAndSeconds(songSrc){
+
+        let audio = new Audio(songSrc);
+        // автоматический расчет длительности проигрывания песни и конвертация из секунд в минуты и секунды
+        return await new Promise(resolve => setTimeout(() => {
+            let fullTime = parseInt(audio.duration, 10);
+            let locMin = parseInt((fullTime / 60), 10);
+            let locSec = fullTime - (locMin * 60);
+            let localMinutes = '';
+            if(locMin < 10){
+                localMinutes = '0' + locMin;
+            }
+            if(locSec < 10){
+                locSec = '0' + locSec;
+            }
+            // console.log(`${localMinutes}:${locSec}`);
+            let result = `${localMinutes}:${locSec}`;
+            resolve (result);
+        }, 70));
+        // нужно на счет задержки setTimeout что-то решить т.к. для некоторых треков може не успеть расчитаться длительность проигрывания
+        // и вывести NaN вместо длительности
+    }
+
     playlistInfo = (e) => {
         e.stopPropagation();
         let list = e.target.closest('.list');
@@ -187,17 +210,19 @@ class Audioplayer {
         }
     }
 
-    generatePlaylist(arr){
+    async generatePlaylist(arr){
         let playlist = '';
         for (let i = 0; i < arr.length; i++){
             let elemName = arr[i].name;
-            let fullTime = arr[i].fullTime;
-            // постановка переменных в шаблон
+            // закомененная строка - старый способ получения длительности
+            // let fullTime = arr[i].fullTime;
+            let fullTime = await this.getTimeInMinutesAndSeconds(arr[i].src);
+            // подстановка переменных в шаблон
             let string = this.templates.song.replace('{i}', i).replace('{elemName}', elemName).replace('{fullTime}', fullTime);
 
             playlist += string;
+            this.addPlaylistToPage(playlist);
         }
-        this.addPlaylistToPage(playlist);
 
     }
 
@@ -678,28 +703,24 @@ let Au = new Audioplayer({
                 name: 'Halogen u got that',
                 img: '',
                 author: '',
-                fullTime: '03:07'
             },
             {
                 src: 'music/TutTutChild_HotPursuit.mp3',
                 name: 'TutTutChild HotPursuit',
                 img: '',
                 author: '',
-                fullTime: '04:58'
             },
             {
                 src: 'music/ac-dc-i-love-rock-and-roll.mp3',
                 name: 'AC/DC I love rock and roll',
                 img: '',
                 author: '',
-                fullTime: '02:55'
             },
             {
                 src: 'music/tones-and-i-dance-monkey.mp3',
                 name: 'Tones and i dance monkey',
                 img: '',
                 author: '',
-                fullTime: '03:29'
             }
         ],
 
@@ -709,21 +730,18 @@ let Au = new Audioplayer({
                 name: 'Bee Gees - Staying Alive',
                 img: '',
                 author: '',
-                fullTime: '04:38'
             },
             {
                 src: 'music/hrj.mp3',
                 name: 'Ray Charles - Hit the road jack',
                 img: '',
                 author: '',
-                fullTime: '01:52'
             },
             {
                 src: 'music/ljapis_trubeckoj_-_kapital_(zvukoff.ru).mp3',
                 name: 'Ляпис Трубецкой - Капитал',
                 img: '',
                 author: '',
-                fullTime: '03:20'
             },
         ]
 
