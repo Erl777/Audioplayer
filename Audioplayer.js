@@ -59,6 +59,7 @@ class Audioplayer {
                         <img class="img-relative" src="img/plus.svg" alt="">
                     </div>`
         };
+        this.buffer = {};
         //this.checkErrors();
         this.generatePlaylist(this.getFirstArrFromPlaylist());
 
@@ -156,7 +157,7 @@ class Audioplayer {
             // console.log(`${localMinutes}:${locSec}`);
             let result = `${localMinutes}:${locSec}`;
             resolve (result);
-        }, 70));
+        }, 50));
         // нужно на счет задержки setTimeout что-то решить т.к. для некоторых треков може не успеть расчитаться длительность проигрывания
         // и вывести NaN вместо длительности
     }
@@ -214,9 +215,21 @@ class Audioplayer {
         let playlist = '';
         for (let i = 0; i < arr.length; i++){
             let elemName = arr[i].name;
+            let fullTime;
+            // если песня есть в буфере, то берется ее длительность
+            if (elemName in this.buffer){
+                fullTime = this.buffer[elemName];
+            }
+            // в ином случае считается (при первой загрузке или при изменении имени песни)
+            else {
+                let songTime = await this.getTimeInMinutesAndSeconds(arr[i].src);
+                this.buffer[elemName] = songTime;
+                fullTime = songTime;
+            }
+
             // закомененная строка - старый способ получения длительности
             // let fullTime = arr[i].fullTime;
-            let fullTime = await this.getTimeInMinutesAndSeconds(arr[i].src);
+
             // подстановка переменных в шаблон
             let string = this.templates.song.replace('{i}', i).replace('{elemName}', elemName).replace('{fullTime}', fullTime);
 
