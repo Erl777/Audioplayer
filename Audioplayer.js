@@ -142,24 +142,26 @@ class Audioplayer {
     async getTimeInMinutesAndSeconds(songSrc){
 
         let audio = new Audio(songSrc);
+        // Дождаемся пока прогрузится песня и происходит
         // автоматический расчет длительности проигрывания песни и конвертация из секунд в минуты и секунды
-        return await new Promise(resolve => setTimeout(() => {
-            let fullTime = parseInt(audio.duration, 10);
-            let locMin = parseInt((fullTime / 60), 10);
-            let locSec = fullTime - (locMin * 60);
-            let localMinutes = '';
-            if(locMin < 10){
-                localMinutes = '0' + locMin;
+        return await new Promise(function (resolve) {
+            audio.onloadeddata = function () {
+                let fullTime = parseInt(audio.duration, 10);
+                let locMin = parseInt((fullTime / 60), 10);
+                let locSec = fullTime - (locMin * 60);
+                let localMinutes = '';
+                if(locMin < 10){
+                    localMinutes = '0' + locMin;
+                }
+                if(locSec < 10){
+                    locSec = '0' + locSec;
+                }
+                // console.log(`${localMinutes}:${locSec}`);
+                let result = `${localMinutes}:${locSec}`;
+                resolve (result);
             }
-            if(locSec < 10){
-                locSec = '0' + locSec;
-            }
-            // console.log(`${localMinutes}:${locSec}`);
-            let result = `${localMinutes}:${locSec}`;
-            resolve (result);
-        }, 50));
-        // нужно на счет задержки setTimeout что-то решить т.к. для некоторых треков може не успеть расчитаться длительность проигрывания
-        // и вывести NaN вместо длительности
+        });
+
     }
 
     playlistInfo = (e) => {
