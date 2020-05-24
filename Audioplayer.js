@@ -35,10 +35,13 @@ class Audioplayer {
         this.redactingSongId = null;
         this.buffer = {};
         //this.checkErrors();
+
+        this.events = ['beforeSongAdded' ,'addSongToPlaylist', 'deleteSong',
+            'beforeSongNameChanged' , 'changeSongName' , 'addPlaylist',
+            'deletePlaylist', 'beforePlaylistReload', 'playlistReloaded',
+            'beforePlaylistsReload', 'playlistsReloaded'
+        ];
         this.generatePlaylist(this.getFirstArrFromPlaylist());
-
-        this.events = ['addSongToPlaylist', 'deleteSong', 'changeSongName' , 'addPlaylist', 'deletePlaylist'];
-
         this.initialization();
     }
 
@@ -188,6 +191,12 @@ class Audioplayer {
     }
 
     async generatePlaylist(arr){
+        // console.log(arr);
+        // Event
+        // document.dispatchEvent(this.events['beforePlaylistReload']);
+        // Event
+        // document.dispatchEvent(this.events['playlistReloaded']);
+
         let playlist = '';
         for (let i = 0; i < arr.length; i++){
             let elemName = arr[i].name;
@@ -212,6 +221,8 @@ class Audioplayer {
             playlist += string;
             this.addPlaylistToPage(playlist);
         }
+
+        this.refreshEventListeners();
 
     }
 
@@ -261,6 +272,10 @@ class Audioplayer {
     };
 
     saveNewSongName(playlistName , songName, songId, reloadPlaylist){
+
+        // Event
+        document.dispatchEvent(this.events['beforeSongNameChanged']);
+
         let playlist = this.settings.playlist[playlistName];
         playlist[songId].name = songName;
         if(reloadPlaylist === 'reload' || reloadPlaylist === true){
@@ -611,7 +626,11 @@ class Audioplayer {
         elem.textContent = this.settings.playlist[playlistName][this.id].name;
     }
 
-    generatePlaylists(){
+    generatePlaylists () {
+
+        // Event
+        // document.dispatchEvent(this.events['beforePlaylistsReload']);
+
         // В этой функции генерирутся и вставляются в разметку блоки с плейлистами
         let playlistsContainer = document.querySelector('.playlists');
         let playlistsNamesArr = Object.keys(this.settings.playlist);
@@ -635,6 +654,9 @@ class Audioplayer {
             }
         }
 
+        // Event
+        // document.dispatchEvent(this.events['playlistsReloaded']);
+
     }
 
     // New universal methods:
@@ -651,6 +673,9 @@ class Audioplayer {
     }
 
     addNewSongToPlaylist = (songSrc, playlistName, songName, reloadPlaylist) => {
+
+        // Event
+        document.dispatchEvent(this.events['beforeSongAdded']);
 
         if(this.checkingForAvailabilityPlaylist(playlistName)){
             let newSongObj = {src: songSrc, name: songName};
@@ -756,6 +781,24 @@ Au.on('addPlaylist', function () {
 });
 Au.on('deletePlaylist', function () {
     console.log('удалили плейлист');
+});
+Au.on('beforeSongAdded', function () {
+    console.log('перед добавлением песни');
+});
+Au.on('beforeSongNameChanged', function () {
+    console.log('перед изменением имени песни');
+});
+Au.on('beforePlaylistReload', function () {
+    console.log('перед переагрузкой плейлиста');
+});
+Au.on('playlistReloaded', function () {
+    console.log('после переагрузки плейлиста');
+});
+Au.on('beforePlaylistsReload', function () {
+    console.log('перед переагрузкой списка плейлистов');
+});
+Au.on('playlistsReloaded', function () {
+    console.log('после переагрузки списка плейлистов');
 });
 
 //Au.addNewSongToPlaylist('music/ljapis_trubeckoj_-_kapital_(zvukoff.ru).mp3', 'default', 'New song', true);
