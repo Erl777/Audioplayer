@@ -35,9 +35,9 @@ Playlist
 * deletePlaylist - activates after playlist deleted
 ----------------------
 Playlist container
-* beforePlaylistReload - coming soon
-* playlistReloaded - coming soon
+* beforePlaylistReload - activates before playlist reloaded
+* playlistReloaded - activates after playlist reloaded
 ----------------------
 Playlists container
-* beforePlaylistsReload - coming soon
-* playlistsReloaded - coming soon
+* beforePlaylistsReload - activates before playlists reloaded
+* playlistsReloaded - activates after playlists reloaded

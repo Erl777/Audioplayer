@@ -35,14 +35,12 @@ class Audioplayer {
         this.redactingSongId = null;
         this.buffer = {};
         //this.checkErrors();
+        this.events = {};
+        setTimeout(() => {
+            this.generatePlaylist(this.getFirstArrFromPlaylist());
+            this.initialization();
+        }, 0);
 
-        this.events = ['beforeSongAdded' ,'addSongToPlaylist', 'deleteSong',
-            'beforeSongNameChanged' , 'changeSongName' , 'addPlaylist',
-            'deletePlaylist', 'beforePlaylistReload', 'playlistReloaded',
-            'beforePlaylistsReload', 'playlistsReloaded'
-        ];
-        this.generatePlaylist(this.getFirstArrFromPlaylist());
-        this.initialization();
     }
 
     on(evName, handler){
@@ -191,11 +189,9 @@ class Audioplayer {
     }
 
     async generatePlaylist(arr){
-        // console.log(arr);
+
         // Event
-        // document.dispatchEvent(this.events['beforePlaylistReload']);
-        // Event
-        // document.dispatchEvent(this.events['playlistReloaded']);
+        document.dispatchEvent(this.events['beforePlaylistReload']);
 
         let playlist = '';
         for (let i = 0; i < arr.length; i++){
@@ -223,6 +219,9 @@ class Audioplayer {
         }
 
         this.refreshEventListeners();
+
+        // Event
+        document.dispatchEvent(this.events['playlistReloaded']);
 
     }
 
@@ -441,8 +440,6 @@ class Audioplayer {
 
     }
 
-    /* --------------------------------------------- */
-
     dataFromAddPlaylistField = () => {
         let playlistNameInput = document.getElementById('newPlaylistName');
         let playlistName = playlistNameInput.value;
@@ -629,7 +626,7 @@ class Audioplayer {
     generatePlaylists () {
 
         // Event
-        // document.dispatchEvent(this.events['beforePlaylistsReload']);
+        document.dispatchEvent(this.events['beforePlaylistsReload']);
 
         // В этой функции генерирутся и вставляются в разметку блоки с плейлистами
         let playlistsContainer = document.querySelector('.playlists');
@@ -655,7 +652,7 @@ class Audioplayer {
         }
 
         // Event
-        // document.dispatchEvent(this.events['playlistsReloaded']);
+        document.dispatchEvent(this.events['playlistsReloaded']);
 
     }
 
