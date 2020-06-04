@@ -48,8 +48,36 @@ class Audioplayer {
         document.addEventListener(evName, handler, false);
     }
 
-    initialization (){
-        this.playBtn.addEventListener('click', this.startPlay);
+    async initialization (){
+
+        // попытка добавить в кеш песню
+        // добавляется песня в кеш
+        caches.open('v1').then(function(cache) {
+            // console.log(123);
+            return cache.add('http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a');
+        });
+
+        const cache = await caches.open('my-cache');
+        let audio = new Audio('music/halogen-u-got-that.mp3');
+
+        // это старый, самый первый вариант добавления в кеш
+        // const response = new Response('http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a');
+        // cache.add('http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a');
+        // const response = new Response('/music/halogen-u-got-that.mp3');
+        // cache.add(response);
+
+        // попытка достать песню из кеша
+        cache.match('http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a')
+            .then((response) => {
+                console.log(response)
+            });
+
+
+        // эта строка нужна), пусть пока будет
+        // this.playBtn.addEventListener('click', this.startPlay);
+        this.playBtn.addEventListener('click',  () => {
+            this.song.play();
+        });
         this.stopBtn.addEventListener('click', this.stopPlay);
 
         this.input.addEventListener('change', this.changeValue);
@@ -103,7 +131,36 @@ class Audioplayer {
 
         this.redactSongNameBtn.addEventListener('click', this.closeModalAndSaveNewSongName);
 
+        this.song.addEventListener('pause',  () => {
+            clearInterval(this.timer);
+        });
+
+        this.song.addEventListener('play', this.newStartPlay);
+
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
+            // User hit "Previous Track" key.
+            console.log('prev');
+            this.prevSong();
+        });
+
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+            // User hit "Next Track" key.
+            console.log('next');
+            this.nextSong();
+        });
+
     }
+
+    newStartPlay = () => {
+
+        this.countTime();
+        this.newTimeReduction();
+        this.input.max = parseInt(this.song.duration);
+
+        // подсветка текущего трека
+        this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
+
+    };
 
     addEventsToArrOfElems(select, event, funcName){
         let Arr = this.playlistContainer.querySelectorAll(select);
