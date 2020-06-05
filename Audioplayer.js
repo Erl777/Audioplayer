@@ -50,14 +50,16 @@ class Audioplayer {
 
     async initialization (){
 
+        // http://192.168.88.60:8000
+
         // попытка добавить в кеш песню
         // добавляется песня в кеш
-        caches.open('v1').then(function(cache) {
-            // console.log(123);
-            return cache.add('http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a');
-        });
+        // caches.open('v1').then(function(cache) {
+        //     // console.log(123);
+        //     return cache.add('http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a');
+        // });
 
-        const cache = await caches.open('my-cache');
+        // const cache = await caches.open('my-cache');
         let audio = new Audio('music/halogen-u-got-that.mp3');
 
         // это старый, самый первый вариант добавления в кеш
@@ -67,10 +69,10 @@ class Audioplayer {
         // cache.add(response);
 
         // попытка достать песню из кеша
-        cache.match('http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a')
-            .then((response) => {
-                console.log(response)
-            });
+        // cache.match('http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a')
+        //     .then((response) => {
+        //         console.log(response)
+        //     });
 
 
         // эта строка нужна), пусть пока будет
@@ -132,20 +134,18 @@ class Audioplayer {
         this.redactSongNameBtn.addEventListener('click', this.closeModalAndSaveNewSongName);
 
         this.song.addEventListener('pause',  () => {
-            clearInterval(this.timer);
+            // clearInterval(this.timer);
         });
 
         this.song.addEventListener('play', this.newStartPlay);
 
         navigator.mediaSession.setActionHandler('previoustrack', () => {
             // User hit "Previous Track" key.
-            console.log('prev');
             this.prevSong();
         });
 
         navigator.mediaSession.setActionHandler('nexttrack', () => {
             // User hit "Next Track" key.
-            console.log('next');
             this.nextSong();
         });
 
@@ -159,7 +159,26 @@ class Audioplayer {
 
         // подсветка текущего трека
         this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
+        this.getSongLoadedPercent();
 
+    };
+
+    getSongLoadedPercent = () =>{
+        document.getElementById('track').addEventListener('timeupdate', () => {
+            let duration =  this.song.duration;
+
+            if (duration > 0) {
+
+                for (var i = 0; i < this.song.buffered.length; i++) {
+                    if (this.song.buffered.start(this.song.buffered.length - 1 - i) < this.song.currentTime) {
+                        // document.getElementById("seek").style.width = (this.song.buffered.end(this.song.buffered.length - 1 - i) / duration) * 100 + "%";
+                        let per = (this.song.buffered.end(this.song.buffered.length - 1 - i) / duration) * 100 + '%';
+                        console.log(per);
+                        break;
+                    }
+                }
+            }
+        });
     };
 
     addEventsToArrOfElems(select, event, funcName){
@@ -193,6 +212,25 @@ class Audioplayer {
                 resolve (result);
             }
         });
+
+    }
+
+    newGetTimeInMinutesAndSeconds(duration){
+
+        // Дождаемся пока прогрузится песня и происходит
+        // автоматический расчет длительности проигрывания песни и конвертация из секунд в минуты и секунды
+        let fullTime = parseInt(duration, 10);
+        let locMin = parseInt((fullTime / 60), 10);
+        let locSec = fullTime - (locMin * 60);
+        let localMinutes = '';
+        if(locMin < 10){
+            localMinutes = '0' + locMin;
+        }
+        if(locSec < 10){
+            locSec = '0' + locSec;
+        }
+        // console.log(`${localMinutes}:${locSec}`);
+        return `${localMinutes}:${locSec}`;
 
     }
 
@@ -249,7 +287,7 @@ class Audioplayer {
 
         // Event
         document.dispatchEvent(this.events['beforePlaylistReload']);
-
+        console.time('Playlistloaded');
         let playlist = '';
         for (let i = 0; i < arr.length; i++){
             let elemName = arr[i].name;
@@ -260,7 +298,9 @@ class Audioplayer {
             }
             // в ином случае считается (при первой загрузке или при изменении имени песни)
             else {
-                let songTime = await this.getTimeInMinutesAndSeconds(arr[i].src);
+                // let songTime = await this.getTimeInMinutesAndSeconds(arr[i].src);
+                // let songTime = '00:00';
+                let songTime = this.newGetTimeInMinutesAndSeconds(arr[i].duration);
                 this.buffer[elemName] = songTime;
                 fullTime = songTime;
             }
@@ -279,7 +319,7 @@ class Audioplayer {
 
         // Event
         document.dispatchEvent(this.events['playlistReloaded']);
-
+        console.timeEnd('Playlistloaded');
     }
 
     getShownPlaylist(){
@@ -640,6 +680,8 @@ class Audioplayer {
             strMin = '';
             strSec = this.seconds;
 
+            if(this.song.paused) clearInterval(this.timer);
+
             if(this.seconds > 59){
                 this.minutes++;
                 if( this.minutes < 10 ){
@@ -771,24 +813,40 @@ let Au = new Audioplayer({
                 name: 'Halogen u got that',
                 img: '',
                 author: '',
+                duration: 187,
+                fullDuration: '03:07'
             },
             {
                 src: 'music/TutTutChild_HotPursuit.mp3',
                 name: 'TutTutChild HotPursuit',
                 img: '',
                 author: '',
+                duration: 150,
+                fullDuration: '04:58'
             },
             {
                 src: 'music/ac-dc-i-love-rock-and-roll.mp3',
                 name: 'AC/DC I love rock and roll',
                 img: '',
                 author: '',
+                duration: 150,
+                fullDuration: '02:55'
             },
             {
                 src: 'music/tones-and-i-dance-monkey.mp3',
                 name: 'Tones and i dance monkey',
                 img: '',
                 author: '',
+                duration: 150,
+                fullDuration: '03:29'
+            },
+            {
+                src: 'http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a',
+                name: 'Short song',
+                img: '',
+                author: '',
+                duration: 170,
+                fullDuration: '03:29'
             }
         ],
 
@@ -798,18 +856,24 @@ let Au = new Audioplayer({
                 name: 'Bee Gees - Staying Alive',
                 img: '',
                 author: '',
+                duration: 150,
+                fullDuration: '04:38'
             },
             {
                 src: 'music/hrj.mp3',
                 name: 'Ray Charles - Hit the road jack',
                 img: '',
                 author: '',
+                duration: 150,
+                fullDuration: '01:52'
             },
             {
                 src: 'music/ljapis_trubeckoj_-_kapital_(zvukoff.ru).mp3',
                 name: 'Ляпис Трубецкой - Капитал',
                 img: '',
                 author: '',
+                duration: 150,
+                fullDuration: '03:20'
             },
         ]
 
@@ -822,37 +886,37 @@ let Au = new Audioplayer({
 });
 
 Au.on('addSongToPlaylist', function () {
-    console.log('добавили новую песню');
+    // console.log('добавили новую песню');
 });
 Au.on('deleteSong', function () {
-    console.log('удалили песню');
+    // console.log('удалили песню');
 });
 Au.on('changeSongName', function () {
-    console.log('изменили песню');
+    // console.log('изменили песню');
 });
 Au.on('addPlaylist', function () {
-    console.log('добавили плейлист');
+    // console.log('добавили плейлист');
 });
 Au.on('deletePlaylist', function () {
-    console.log('удалили плейлист');
+    // console.log('удалили плейлист');
 });
 Au.on('beforeSongAdded', function () {
-    console.log('перед добавлением песни');
+    // console.log('перед добавлением песни');
 });
 Au.on('beforeSongNameChanged', function () {
-    console.log('перед изменением имени песни');
+    // console.log('перед изменением имени песни');
 });
 Au.on('beforePlaylistReload', function () {
-    console.log('перед переагрузкой плейлиста');
+    // console.log('перед переагрузкой плейлиста');
 });
 Au.on('playlistReloaded', function () {
-    console.log('после переагрузки плейлиста');
+    // console.log('после переагрузки плейлиста');
 });
 Au.on('beforePlaylistsReload', function () {
-    console.log('перед переагрузкой списка плейлистов');
+    // console.log('перед переагрузкой списка плейлистов');
 });
 Au.on('playlistsReloaded', function () {
-    console.log('после переагрузки списка плейлистов');
+    // console.log('после переагрузки списка плейлистов');
 });
 
 //Au.addNewSongToPlaylist('music/ljapis_trubeckoj_-_kapital_(zvukoff.ru).mp3', 'default', 'New song', true);
