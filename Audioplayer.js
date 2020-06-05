@@ -32,6 +32,7 @@ class Audioplayer {
         this.redactInput = document.getElementById('redactSongNameInput');
         this.redactSongNameBtn = document.getElementById('redactSongNameBtn');
         this.modalOverlay = document.querySelector('.modal-overlay');
+        this.preload = document.getElementById('preload');
         this.redactingSongId = null;
         this.buffer = {};
         //this.checkErrors();
@@ -54,7 +55,7 @@ class Audioplayer {
 
         // попытка добавить в кеш песню
         // добавляется песня в кеш
-        // caches.open('v1').then(function(cache) {
+        // await caches.open('v1').then(function(cache) {
         //     // console.log(123);
         //     return cache.add('http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a');
         // });
@@ -69,7 +70,7 @@ class Audioplayer {
         // cache.add(response);
 
         // попытка достать песню из кеша
-        // cache.match('http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a')
+        // caches.match('http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a')
         //     .then((response) => {
         //         console.log(response)
         //     });
@@ -148,6 +149,8 @@ class Audioplayer {
             // User hit "Next Track" key.
             this.nextSong();
         });
+        // получаю название первого плейлиста и добавляю его к элементу playlistContainer
+        this.playlistContainer.dataset.playlistName = this.getFirstPlaylistName();
 
     }
 
@@ -168,18 +171,22 @@ class Audioplayer {
             let duration =  this.song.duration;
 
             if (duration > 0) {
-
+                // вывод процента подгрузки песни
                 for (var i = 0; i < this.song.buffered.length; i++) {
                     if (this.song.buffered.start(this.song.buffered.length - 1 - i) < this.song.currentTime) {
-                        // document.getElementById("seek").style.width = (this.song.buffered.end(this.song.buffered.length - 1 - i) / duration) * 100 + "%";
-                        let per = (this.song.buffered.end(this.song.buffered.length - 1 - i) / duration) * 100 + '%';
-                        console.log(per);
+                        // console.log( Math.round((this.song.buffered.end(this.song.buffered.length - 1 - i) / duration) * 100) + '%');
+                        this.preload.textContent = Math.round((this.song.buffered.end(this.song.buffered.length - 1 - i) / duration) * 100) + '%';
                         break;
                     }
                 }
             }
         });
     };
+
+    getFirstPlaylistName(){
+        // console.log(Object.keys(this.settings.playlist[0]) );
+        return Object.keys(this.settings.playlist)[0];
+    }
 
     addEventsToArrOfElems(select, event, funcName){
         let Arr = this.playlistContainer.querySelectorAll(select);
@@ -807,6 +814,27 @@ class Audioplayer {
 let Au = new Audioplayer({
     playlist: {
 
+        online: [
+            {
+                src: 'https://dl3.ru-music.xn--41a.ws/mp3/4039.mp3',
+                name: "Maruv Boosin",
+                duration: 178
+            },
+            {
+                src: 'https://dl3.ru-music.xn--41a.ws/mp3/3402.mp3',
+                name: "Armin Van Buuren",
+                duration: 191
+            },
+            {
+                src: 'http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a',
+                name: 'Short song',
+                img: '',
+                author: '',
+                duration: 170,
+                fullDuration: '03:29'
+            }
+        ],
+
         default: [
             {
                 src: 'music/halogen-u-got-that.mp3',
@@ -840,14 +868,6 @@ let Au = new Audioplayer({
                 duration: 150,
                 fullDuration: '03:29'
             },
-            {
-                src: 'http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a',
-                name: 'Short song',
-                img: '',
-                author: '',
-                duration: 170,
-                fullDuration: '03:29'
-            }
         ],
 
         custom : [

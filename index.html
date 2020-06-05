@@ -16,24 +16,25 @@
 
             <div class="buttons">
 
-                <a class="button shadow" id="prevNew" href="#" title="">
+                <button class="button shadow" id="prevNew" type="button" title="">
                     <img class="img-relative" src="img/next.svg" style="transform: rotate(180deg)" alt="">
-                </a>
-                <a class="button shadow" id="playNew" href="#" title="">
+                </button>
+                <button class="button shadow" id="playNew" type="button" title="">
                     <img class="img-relative" src="img/play.svg" alt="">
-                </a>
+                </button>
 
-                <a class="button shadow" id="stopNew" href="#" title="">
+                <button class="button shadow" id="stopNew" type="button" title="">
                     <img class="img-relative" src="img/stop.svg" alt="">
-                </a>
-                <a class="button shadow" id="nextNew" href="#" title="">
+                </button>
+                <button class="button shadow" id="nextNew" type="button" title="">
                     <img class="img-relative" src="img/next.svg" alt="">
-                </a>
+                </button>
 
             </div>
 
             <div class="progress-and-time">
                 <input type="range" id="seek" value="0" max=""/>
+                <span id="preload" title="song preload">0%</span>
                 <span id="timeleft">00:00</span>
                 <span class="separator">/</span>
                 <span id="song-duration">00:00</span>

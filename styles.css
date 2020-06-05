@@ -121,7 +121,12 @@ body{
     text-decoration: none;
     color: black;
     font-weight: bold;
+    outline: none;
+    border: 0;
+}
 
+.button:hover{
+    cursor: pointer;
 }
 
 .buttons, .progress-and-time{
@@ -407,4 +412,8 @@ input::-webkit-slider-thumb:hover{
 
 .text-center{
     text-align: center;
+}
+
+#preload{
+    margin-right: 10px;
 }
