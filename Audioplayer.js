@@ -61,7 +61,7 @@ class Audioplayer {
         // });
 
         // const cache = await caches.open('my-cache');
-        let audio = new Audio('music/halogen-u-got-that.mp3');
+        // let audio = new Audio('music/halogen-u-got-that.mp3');
 
         // это старый, самый первый вариант добавления в кеш
         // const response = new Response('http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a');
@@ -156,13 +156,15 @@ class Audioplayer {
 
     newStartPlay = () => {
 
-        this.countTime();
-        this.newTimeReduction();
-        this.input.max = parseInt(this.song.duration);
+        this.song.onloadeddata = () =>{
+            this.countTime();
+            this.newTimeReduction();
+            this.input.max = parseInt(this.song.duration);
 
-        // подсветка текущего трека
-        this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
-        this.getSongLoadedPercent();
+            // подсветка текущего трека
+            this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
+            this.getSongLoadedPercent();
+        }
 
     };
 
@@ -319,9 +321,8 @@ class Audioplayer {
             let string = templates.song.replace('{i}', i).replace('{elemName}', elemName).replace('{fullTime}', fullTime);
 
             playlist += string;
-            this.addPlaylistToPage(playlist);
         }
-
+        this.addPlaylistToPage(playlist);
         this.refreshEventListeners();
 
         // Event
@@ -435,7 +436,7 @@ class Audioplayer {
 
         this.song.src = this.settings.playlist[playlistName][songId].src; // как называется использвание 2х [] скобок?
         this.song.load();
-        this.startPlay();
+        this.song.play();
 
     }
 
@@ -668,6 +669,7 @@ class Audioplayer {
 
         this.checkSongCondition();
         this.song.currentTime = this.input.value;
+        this.newTimeReduction();
 
     };
 
