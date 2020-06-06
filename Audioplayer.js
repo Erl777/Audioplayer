@@ -430,11 +430,49 @@ class Audioplayer {
         return this.playlistContainer.dataset.playlistName;
     }
 
-    changeSrcInAudioElem (playlist, songId) {
+    async changeSrcInAudioElem (playlist, songId) {
 
         let playlistName = this.getShownPlaylistName();
 
-        this.song.src = this.settings.playlist[playlistName][songId].src; // как называется использвание 2х [] скобок?
+        function getCache(request) {
+            return caches.open('songs')
+                .then(cache => cache.match(request));
+        }
+
+        function addSongToCache(request, response) {
+            console.log('try to put song in cache');
+            return caches.open('songs')
+                .then(cache => cache.put(request, response));
+        }
+
+        function getNetworkRequest (request) {
+            // Fetch network artwork.
+            return fetch(request)
+                .then(networkResponse => {
+                    if (networkResponse.status !== 200) {
+                        return Promise.reject('Network artwork response is not valid');
+                    }
+                    // Add artwork to the cache for later use and return network response.
+                    addSongToCache(request, networkResponse.clone());
+                    return networkResponse;
+                })
+                .catch(error => {
+                    // Return cached fallback artwork.
+                    console.log('get from cache');
+                    return getCache(new Request(request))
+                });
+        }
+
+        let data = await getNetworkRequest(this.settings.playlist[playlistName][songId].src);
+        // console.log(data.url);
+
+        // если песня пришла из кеша, то она вкладывается в аудио элемент, если нет - из хранилища
+        if(data.url !== undefined){
+            this.song.src = data.url;
+        }
+        else{
+            this.song.src = this.settings.playlist[playlistName][songId].src; // как называется использвание 2х [] скобок?
+        }
         this.song.load();
         this.song.play();
 
@@ -449,6 +487,7 @@ class Audioplayer {
             this.input.value = 0;
             this.id++;
             this.changeSrcInAudioElem(this.settings.playlist[playlistName], this.id);
+            this.song.currentTime = 0;
             this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
         }
 
@@ -667,7 +706,7 @@ class Audioplayer {
 
     changeValue = () =>{
 
-        this.checkSongCondition();
+        // this.checkSongCondition();
         this.song.currentTime = this.input.value;
         this.newTimeReduction();
 
