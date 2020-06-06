@@ -471,11 +471,14 @@ class Audioplayer {
                 });
         }
 
-        let data = await getNetworkRequest(this.settings.playlist[playlistName][songId].src);
-        // console.log(data.url);
+        let data = undefined;
+        // это условие позволяет не делать запрос, если песня запускается локально
+        if( !(this.settings.playlist[playlistName][songId].src).includes('music/') ){
+            data = await getNetworkRequest(this.settings.playlist[playlistName][songId].src);
+        }
 
         // если песня пришла из кеша, то она вкладывается в аудио элемент, если нет - из хранилища
-        if(data.url !== undefined){
+        if(data !== undefined){
             this.song.src = data.url;
         }
         else{
@@ -651,13 +654,15 @@ class Audioplayer {
     dataFromAddSongField = () => {
         let songNameInput = document.getElementById('newSongName');
         let songSrcInput = document.getElementById('newSongSrc');
+        let songImgInput = document.getElementById('newSongImg');
         let songName = songNameInput.value;
         let songSrc = songSrcInput.value;
+        let songImg = songImgInput.value;
         if(songName === ''){
             songName = songSrc.split('.')[0];
         }
         if( songSrc !== '' ){
-            this.addNewSongToPlaylist(songSrc, this.getShownPlaylistName(), songName, true);
+            this.addNewSongToPlaylist(songSrc, this.getShownPlaylistName(), songName, songImg , true);
         }
 
     };
@@ -830,13 +835,14 @@ class Audioplayer {
         }
     }
 
-    addNewSongToPlaylist = (songSrc, playlistName, songName, reloadPlaylist) => {
+    async addNewSongToPlaylist (songSrc, playlistName, songName, songImg, reloadPlaylist) {
 
         // Event
         document.dispatchEvent(this.events['beforeSongAdded']);
 
         if(this.checkingForAvailabilityPlaylist(playlistName)){
-            let newSongObj = {src: songSrc, name: songName};
+            let songDuration = await this.getSongDurationInMs(songSrc);
+            let newSongObj = {src: songSrc, name: songName, img: songImg, duration: songDuration};
 
             if( playlistName !== '' && songSrc !== ''){
 
@@ -855,6 +861,16 @@ class Audioplayer {
             document.dispatchEvent(this.events['addSongToPlaylist']);
         }
     };
+
+    async getSongDurationInMs(songSrc){
+        let audio = new Audio(songSrc);
+
+        return await new Promise(function (resolve) {
+            audio.onloadeddata = function () {
+                resolve ( parseInt(audio.duration) );
+            }
+        });
+    }
 
     reloadShownPlaylist(){
         //отрисовка плейлиста с новой песней
@@ -996,10 +1012,10 @@ Au.on('playlistsReloaded', function () {
     // console.log('после переагрузки списка плейлистов');
 });
 
-//Au.addNewSongToPlaylist('music/ljapis_trubeckoj_-_kapital_(zvukoff.ru).mp3', 'default', 'New song', true);
+//Au.addNewSongToPlaylist('music/ljapis_trubeckoj_-_kapital_(zvukoff.ru).mp3', 'default', 'New song', '', true);
 // + проверка на наналичие id песни
 //Au.deleteSongFromPlaylist('default', 2, true);
 //Au.addNewPlaylist('mySongs', true);
-//Au.addNewSongToPlaylist('music/ljapis_trubeckoj_-_kapital_(zvukoff.ru).mp3', 'mySongs', 'New song');
+//Au.addNewSongToPlaylist('music/ljapis_trubeckoj_-_kapital_(zvukoff.ru).mp3', 'mySongs', 'New song', '');
 //Au.deletePlaylist('default');
 //Au.saveNewSongName('default', 'AC/DC', 2, true);
