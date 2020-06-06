@@ -314,11 +314,19 @@ class Audioplayer {
                 fullTime = songTime;
             }
 
+            let img;
+            if(arr[i].img === '' ){
+                img = 'img/no-image.png';
+            }
+            else {
+                img = arr[i].img;
+            }
+
             // закомененная строка - старый способ получения длительности
             // let fullTime = arr[i].fullTime;
 
             // подстановка переменных в шаблон
-            let string = templates.song.replace('{i}', i).replace('{elemName}', elemName).replace('{fullTime}', fullTime);
+            let string = templates.song.replace('{i}', i).replace('{elemName}', elemName).replace('{fullTime}', fullTime).replace('{img}', img);
 
             playlist += string;
         }
@@ -531,7 +539,13 @@ class Audioplayer {
     };
 
     changePlaylist = (e) => {
-        let data = e.target.parentElement.dataset.playlistItem;
+        let data;
+        if (e.target.classList.contains('list')){
+            data = e.target.dataset.playlistItem;
+        }
+        else {
+            data = e.target.parentElement.dataset.playlistItem;
+        }
         this.generatePlaylist(this.settings.playlist[data]);
         document.getElementById('playlist').dataset.playlistName = data;
         this.refreshEventListeners();
@@ -859,17 +873,19 @@ let Au = new Audioplayer({
             {
                 src: 'https://dl3.ru-music.xn--41a.ws/mp3/4039.mp3',
                 name: "Maruv Boosin",
-                duration: 178
+                duration: 178,
+                img: 'https://i3.ru-music.org/img/song/thumb/279-the-qemists-no-more.jpg',
             },
             {
                 src: 'https://dl3.ru-music.xn--41a.ws/mp3/3402.mp3',
                 name: "Armin Van Buuren",
-                duration: 191
+                duration: 191,
+                img: 'https://i3.ru-music.org/img/song/thumb/835-joe-ford-let-it-out.jpg',
             },
             {
                 src: 'http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a',
                 name: 'Short song',
-                img: '',
+                img: 'https://i3.ru-music.org/img/song/thumb/283-tokyo-prose-see-through-love-original-mix.jpg',
                 author: '',
                 duration: 170,
                 fullDuration: '03:29'
@@ -880,7 +896,7 @@ let Au = new Audioplayer({
             {
                 src: 'music/halogen-u-got-that.mp3',
                 name: 'Halogen u got that',
-                img: '',
+                img: 'https://i3.ru-music.org/img/song/thumb/3402-armin-van-buuren-shivers-ft-susana.jpg',
                 author: '',
                 duration: 187,
                 fullDuration: '03:07'

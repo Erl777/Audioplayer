@@ -385,6 +385,10 @@ input::-webkit-slider-thumb:hover{
     display: flex !important;
 }
 
+.align-items-center{
+    align-items: center;
+}
+
 .list:hover .delete-playlist-icon{
     display: flex;
 }
@@ -416,4 +420,17 @@ input::-webkit-slider-thumb:hover{
 
 #preload{
     margin-right: 10px;
+}
+
+.song-img-container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 35px;
+    margin-right: 5px;
+}
+
+.song-img-container > img{
+    max-width: 100%;
+    border-radius: 25%;
 }

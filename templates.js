@@ -1,5 +1,10 @@
 let templates = {
-    song: `<div class="song hover-base" data-song-id="{i}"> {elemName} 
+    song: `<div class="song hover-base" data-song-id="{i}">
+                            <div class="d-flex align-items-center">
+                                <div class="song-img-container"><img src="{img}" alt=""></div>
+                                {elemName} 
+                            </div>
+                            
                             <div class='actions'>
                             
                                 <div class="img-container edit">
