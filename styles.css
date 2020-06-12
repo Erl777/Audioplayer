@@ -435,3 +435,11 @@ input::-webkit-slider-thumb:hover{
     max-width: 100%;
     border-radius: 25%;
 }
+
+.show{
+    display: block !important;
+}
+
+#playNew > img{
+    display: none;
+}

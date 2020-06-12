@@ -51,37 +51,17 @@ class Audioplayer {
 
     async initialization (){
 
-        // http://192.168.88.60:8000
-
-        // попытка добавить в кеш песню
-        // добавляется песня в кеш
-        // await caches.open('v1').then(function(cache) {
-        //     // console.log(123);
-        //     return cache.add('http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a');
-        // });
-
-        // const cache = await caches.open('my-cache');
-        // let audio = new Audio('music/halogen-u-got-that.mp3');
-
-        // это старый, самый первый вариант добавления в кеш
-        // const response = new Response('http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a');
-        // cache.add('http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a');
-        // const response = new Response('/music/halogen-u-got-that.mp3');
-        // cache.add(response);
-
-        // попытка достать песню из кеша
-        // caches.match('http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a')
-        //     .then((response) => {
-        //         console.log(response)
-        //     });
-
-
         // эта строка нужна), пусть пока будет
         // this.playBtn.addEventListener('click', this.startPlay);
         this.playBtn.addEventListener('click',  () => {
-            this.song.play();
+            if(this.playBtn.dataset.action === 'play'){
+                this.song.play();
+            }
+            else {
+                this.stopPlay();
+            }
         });
-        this.stopBtn.addEventListener('click', this.stopPlay);
+        this.stopBtn.addEventListener('click', this.discharge);
 
         this.input.addEventListener('change', this.changeValue);
         this.input.addEventListener('input', this.chooseValue);
@@ -136,6 +116,7 @@ class Audioplayer {
 
         this.song.addEventListener('pause',  () => {
             // clearInterval(this.timer);
+            this.togglePlayPause();
         });
 
         this.song.addEventListener('play', this.newStartPlay);
@@ -151,15 +132,48 @@ class Audioplayer {
         });
         // получаю название первого плейлиста и добавляю его к элементу playlistContainer
         this.playlistContainer.dataset.playlistName = this.getFirstPlaylistName();
+        // выставление нужной картинки play или pause
+        this.togglePlayPause();
 
     }
+    // Сброс
+    discharge = () => {
+        this.song.pause();
+        clearInterval(this.timer);
+        this.timer = false;
+        this.preload.textContent = '0 %';
+        this.timeElem.textContent = '00:00';
+        this.song.currentTime = 0;
+        this.input.value = 0;
+        let activeSong = document.querySelector('.song.playing');
+        if(activeSong){
+            activeSong.classList.remove('playing');
+        }
+        document.getElementById('song-duration').textContent = '00:00';
+    };
 
-    newStartPlay = () => {
-
+    newStartPlay = () =>  {
+        this.checkSongCondition();
+        if(this.song.readyState > 0){
+            this.countTime();
+            this.newTimeReduction();
+            this.input.max = parseInt(this.song.duration);
+            // переклюение изображения стоп/запуск
+            this.togglePlayPause();
+            // подсветка текущего трека
+            this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
+            this.getSongLoadedPercent();
+        }
         this.song.onloadeddata = () =>{
             this.countTime();
             this.newTimeReduction();
             this.input.max = parseInt(this.song.duration);
+
+            // в этом кусочке кода я вручную выставляю dataset, чтобы при включении песни
+            // отображалась только картинка паузы
+            this.playBtn.dataset.action = 'play';
+            this.togglePlayPause();
+            //------------------------------------
 
             // подсветка текущего трека
             this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
@@ -184,6 +198,22 @@ class Audioplayer {
             }
         });
     };
+
+    togglePlayPause(){
+        let shownIconArr = this.playBtn.querySelectorAll('.show');
+        for(let i = 0; i < shownIconArr.length; i++){
+            shownIconArr[i].classList.remove('show');
+        }
+
+        if(this.playBtn.dataset.action === "pause"){
+            this.playBtn.querySelector('.play').classList.add('show');
+            this.playBtn.dataset.action = 'play';
+        }
+        else {
+            this.playBtn.querySelector('.pause').classList.add('show');
+            this.playBtn.dataset.action = 'pause';
+        }
+    }
 
     getFirstPlaylistName(){
         // console.log(Object.keys(this.settings.playlist[0]) );
@@ -517,7 +547,7 @@ class Audioplayer {
         this.input.value = 0;
         //---------------------
         this.id = songId;
-
+        this.togglePlayPause();
         this.changeSrcInAudioElem(this.settings.playlist[playlistName], songId);
 
         if(this.playingPlaylist != this.getShownPlaylistName()){
@@ -689,7 +719,7 @@ class Audioplayer {
 
     clearPlayingSongs(){
         // очистка всех элементов с классом playing
-        let playingSongs = document.querySelectorAll('.playing');
+        let playingSongs = document.querySelectorAll('.song');
         for (let i = 0; i< playingSongs.length; i++){
             playingSongs[i].classList.remove('playing');
         }
