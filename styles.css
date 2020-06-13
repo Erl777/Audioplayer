@@ -443,3 +443,73 @@ input::-webkit-slider-thumb:hover{
 #playNew > img{
     display: none;
 }
+
+#mylog{
+    max-height: 100vh;
+    overflow: auto;
+    position: fixed;
+    width: 50%;
+    height: 100%;
+    background-color: rgba(84, 99, 121, 0.9);
+    left: 0;
+    top: 0;
+    transform: translateX(-100%);
+    transition: .3s linear;
+    padding: 0 5px;
+}
+
+#mylog.info{
+    transform: translateX(0);
+}
+
+#mylog p{
+    margin: 2px 0 0 0;
+    border-bottom: 1px solid #e6e6e6;
+    color: #e6e6e6;
+}
+
+.open-log{
+    min-width: 30px;
+    height: 30px;
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    border-radius: 4px;
+    background-color: rgba(0,0,0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+}
+
+.open-log:hover{
+    cursor: pointer;
+}
+
+.more-actions{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 2px;
+    background-color: var(--main-color);
+    border-bottom: 1px solid white;
+}
+
+.more-actions .img-container{
+    width: 23px;
+    height: 23px;
+    margin-right: 10px;
+}
+
+.more-actions >div:hover{
+    cursor: pointer;
+}
+
+.more-actions >div:last-child{
+    margin-right: 5px;
+}
+
+.loop-active, .random-active{
+    border-radius: 4px;
+    background-color: white;
+}

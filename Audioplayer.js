@@ -9,6 +9,8 @@ class Audioplayer {
             stopBtnId: options.stopBtnId || 'stop',
             nextBtnId: options.nextBtnId || 'next',
             prevBtnId: options.prevBtnId || 'prev',
+            randomSong: options.randomSong || false,
+            loop: options.loop || false,
         };
         this.playBtn = document.getElementById(this.settings.startBtnId);
         this.stopBtn = document.getElementById(this.settings.stopBtnId);
@@ -37,6 +39,9 @@ class Audioplayer {
         this.buffer = {};
         //this.checkErrors();
         this.events = {};
+        this.log = document.getElementById('mylog');
+        this.loop = document.querySelector('.js-loop');
+        this.randomSongElem = document.querySelector('.js-random');
         setTimeout(() => {
             this.generatePlaylist(this.getFirstArrFromPlaylist());
             this.initialization();
@@ -135,7 +140,78 @@ class Audioplayer {
         // выставление нужной картинки play или pause
         this.togglePlayPause();
 
+        document.querySelector('.js-open-log').addEventListener('click', this.openLog);
+        if ('serviceWorker' in navigator){
+            this.writeInLog('Service worker is enabled');
+        }
+
+        this.loop.addEventListener('click', this.loopToggle);
+        this.randomSongElem.addEventListener('click', this.randomSongToggle);
+
+        if(this.settings.loop === true) this.loopToggle();
+        if(this.settings.randomSong === true) {
+            this.randomSongElem.classList.add('random-active');
+            this.writeInLog('randomSong = ' + this.settings.randomSong);
+        }
+
+        this.song.addEventListener('ended', ()=>{
+            console.log('finished playing');
+            clearInterval(this.timer);
+            if(this.settings.randomSong === true){
+                this.discharge();
+                this.startRandomSong();
+            }
+            else {
+                this.nextSong();
+            }
+        })
+
     }
+
+    // Переключение зацикливания
+    loopToggle = () => {
+        this.loop.classList.toggle('loop-active');
+        // переключение параметра loop у аудио элемента
+        this.song.loop = this.song.loop !== true;
+        this.writeInLog('loop = ' + this.song.loop);
+    };
+
+    // переключение вклюения случайной песни
+    randomSongToggle = () => {
+        this.randomSongElem.classList.toggle('random-active');
+        // переключение параметра randomSong
+        this.settings.randomSong = this.settings.randomSong !== true;
+        this.writeInLog('randomSong = ' + this.settings.randomSong);
+    };
+
+    startRandomSong ()  {
+        this.writeInLog('start random song generation');
+
+        if(this.settings.randomSong === true){
+            // получаю кол-во песен в открытом плейлисте
+            let numberOfSongs = this.settings.playlist[this.getShownPlaylistName()].length;
+            // рандомлю число из промежутка
+            let randomedNumber = Math.floor(Math.random() * (+numberOfSongs  - +0)) + +0;
+            this.writeInLog('random song id = ' + randomedNumber);
+            // меняю текущий плейлист на тот, в котором будет играть песня
+            this.playingPlaylist = this.getShownPlaylistName();
+            // собираю массив из песен в плейлисте
+            let shownSongsArr = document.querySelectorAll('div[data-song-id]');
+            // console.log(shownSongsArr);
+            // прохожусь по плейлисту и нахожу песню с нужным id
+            shownSongsArr.forEach((item) => {
+                if(item.dataset.songId == randomedNumber){
+                    // console.log(item);
+                    this.changeSrcInAudioElem(this.getShownPlaylistName, randomedNumber);
+                    // меняю id песни, чтобы подсветило нужную
+                    this.id = randomedNumber;
+                    this.writeInLog('random song was chosen');
+                }
+            });
+
+        }
+    }
+
     // Сброс
     discharge = () => {
         this.song.pause();
@@ -150,11 +226,13 @@ class Audioplayer {
             activeSong.classList.remove('playing');
         }
         document.getElementById('song-duration').textContent = '00:00';
+        this.writeInLog('discharged');
     };
 
     newStartPlay = () =>  {
         this.checkSongCondition();
         if(this.song.readyState > 0){
+            this.writeInLog('start by ready state');
             this.countTime();
             this.newTimeReduction();
             this.input.max = parseInt(this.song.duration);
@@ -165,6 +243,7 @@ class Audioplayer {
             this.getSongLoadedPercent();
         }
         this.song.onloadeddata = () =>{
+            this.writeInLog('start by onloaded data');
             this.countTime();
             this.newTimeReduction();
             this.input.max = parseInt(this.song.duration);
@@ -462,6 +541,9 @@ class Audioplayer {
             let songsArr = document.querySelector(`div[data-playlist-name=${this.playingPlaylist}]`).querySelectorAll(`div[data-song-id]`);
             return  songsArr[this.id];
         }
+        else {
+            console.log('плейлисты не равны!');
+        }
     }
 
     getShownPlaylistName(){
@@ -478,7 +560,7 @@ class Audioplayer {
         }
 
         function addSongToCache(request, response) {
-            console.log('try to put song in cache');
+            // console.log('try to put song in cache');
             return caches.open('songs')
                 .then(cache => cache.put(request, response));
         }
@@ -496,7 +578,7 @@ class Audioplayer {
                 })
                 .catch(error => {
                     // Return cached fallback artwork.
-                    console.log('get from cache');
+                    // console.log('get from cache');
                     return getCache(new Request(request))
                 });
         }
@@ -515,6 +597,22 @@ class Audioplayer {
             this.song.src = this.settings.playlist[playlistName][songId].src; // как называется использвание 2х [] скобок?
         }
         this.song.load();
+        try {
+            // пытаюсь добавить title и image
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: this.settings.playlist[playlistName][songId].name,
+                artwork: [
+                    { src: this.settings.playlist[playlistName][songId].img, sizes: '512x512', type: 'image/png' },
+                ]
+            });
+            this.writeInLog('navigator added elements');
+        }
+        catch (e) {
+            console.log('navigator can not add title or image');
+            this.writeInLog('navigator can not add title or image');
+            console.log(e);
+        }
+
         this.song.play();
 
     }
@@ -726,7 +824,7 @@ class Audioplayer {
     }
 
     checkSongCondition(){
-        console.log('Состояние песни = ' + this.song.readyState);
+        this.writeInLog('Состояние песни = ' + this.song.readyState);
     }
 
     checkErrors(){
@@ -744,12 +842,13 @@ class Audioplayer {
 
     setTime = () =>{
         if(this.song.ended){
+            console.log('try to play next song');
             this.nextSong();
         }
     };
 
     chooseValue = () => {
-      this.song.removeEventListener('timeupdate', this.setTime);
+      // this.song.removeEventListener('timeupdate', this.setTime);
       clearInterval(this.timer);
     };
 
@@ -772,6 +871,11 @@ class Audioplayer {
 
         let strMin = '';
         let strSec = '';
+        // console.log(parseInt(this.song.duration));
+        // if (this.song.loop === true){
+        //     let finishTime = parseInt(this.song.duration) * 1000;
+        //     setTimeout(() =>{clearInterval(this.timer)}, finishTime)
+        // }
 
         this.timer = setInterval(() =>{
             strMin = '';
@@ -800,11 +904,11 @@ class Audioplayer {
             // console.log(strMin + " " + strSec);
             this.timeElem.textContent = (`${strMin}:${strSec}`);
 
-            if(this.song.ended ){
-                console.log('finished playing');
-                clearInterval(this.timer);
-                this.nextSong();
-            }
+            // if(this.song.ended ){
+            //     console.log('finished playing');
+            //     clearInterval(this.timer);
+            //     this.nextSong();
+            // }
 
             this.seconds++;
             this.input.value = this.song.currentTime;
@@ -909,7 +1013,16 @@ class Audioplayer {
         this.refreshEventListeners();
         this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
     }
-    
+
+    openLog = () => {
+        this.log.classList.toggle('info');
+    };
+
+    writeInLog(info){
+        let p = `<p>${info}</p>`;
+        this.log.innerHTML += p;
+    }
+
 }
 
 let Au = new Audioplayer({
@@ -1006,6 +1119,8 @@ let Au = new Audioplayer({
     stopBtnId: 'stopNew',
     nextBtnId: 'nextNew',
     prevBtnId: 'prevNew',
+    randomSong: true,
+    loop: true
 });
 
 Au.on('addSongToPlaylist', function () {
