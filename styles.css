@@ -513,3 +513,15 @@ input::-webkit-slider-thumb:hover{
     border-radius: 4px;
     background-color: white;
 }
+
+#cachesSize{
+    display: block;
+    color: black;
+    margin-left: 5px;
+}
+
+#clear-caches{
+    margin-right: auto;
+    padding: 2px;
+}
+

@@ -42,6 +42,8 @@ class Audioplayer {
         this.log = document.getElementById('mylog');
         this.loop = document.querySelector('.js-loop');
         this.randomSongElem = document.querySelector('.js-random');
+        this.songStaring = false;
+        this.clearCacheElem = document.getElementById('clear-caches');
         setTimeout(() => {
             this.generatePlaylist(this.getFirstArrFromPlaylist());
             this.initialization();
@@ -164,8 +166,10 @@ class Audioplayer {
             else {
                 this.nextSong();
             }
-        })
+        });
 
+        this.showCacheSize();
+        this.clearCacheElem.addEventListener('click', this.clearCache);
     }
 
     // Переключение зацикливания
@@ -596,7 +600,7 @@ class Audioplayer {
         else{
             this.song.src = this.settings.playlist[playlistName][songId].src; // как называется использвание 2х [] скобок?
         }
-        this.song.load();
+        // this.song.load();
         try {
             // пытаюсь добавить title и image
             navigator.mediaSession.metadata = new MediaMetadata({
@@ -613,12 +617,62 @@ class Audioplayer {
             console.log(e);
         }
 
-        this.song.play();
+        var playPromise = this.song.play();
+
+        if (playPromise !== undefined) {
+            playPromise.then(_ => {
+                // Automatic playback started!
+            })
+            .catch(error => {
+                console.log('Auto-play was prevented');
+                this.writeInLog('Auto-play was prevented');
+                // Auto-play was prevented
+            });
+        }
+        // подтверждаю, что песня запущена
+        this.songStaring = false;
+        this.showCacheSize();
 
     }
 
-    nextSong = () =>{
+    showCacheSize(){
+        caches.open('songs')
+            .then(cache => cache.matchAll())
+            .then(responses => {
+                let cacheSize = 0;
+                let blobQueue = Promise.resolve();
 
+                responses.forEach(response => {
+                    let responseSize = response.headers.get('content-length');
+                    if (responseSize) {
+                        // Use content-length HTTP header when possible.
+                        cacheSize += Number(responseSize);
+                    } else {
+                        // Otherwise, use the uncompressed blob size.
+                        blobQueue = blobQueue.then(_ => response.blob())
+                            .then(blob => { cacheSize += blob.size; blob.close(); });
+                    }
+                });
+
+                return blobQueue.then(_ => {
+                    console.log('Your Cache is about ' + cacheSize + ' Bytes.');
+                    document.getElementById('cachesSize').textContent = (parseInt(cacheSize / 1000000)) + ' Mb';
+                });
+            })
+            .catch(error => { console.log(error); });
+    }
+
+    clearCache = () => {
+        caches.delete('songs');
+        // sessionStorage.clear();
+        this.writeInLog('caches cleared');
+        console.log('caches cleared');
+        document.getElementById('cachesSize').textContent = '0 Mb';
+        // location.reload();
+    };
+
+    nextSong = () =>{
+        this.showCacheSize();
         let playlistName = this.getShownPlaylistName();
 
         if( this.id < this.settings.playlist[playlistName].length - 1 ){
@@ -633,30 +687,35 @@ class Audioplayer {
     };
 
     nextSongFromPlaylist = (e) => {
+        this.showCacheSize();
+        if(this.songStaring === false) this.songStaring = true;
+        if(this.songStaring === true){
+            let playlistName = this.getShownPlaylistName();
 
-        let playlistName = this.getShownPlaylistName();
+            let song = '';
+            if(e.target.classList.contains('song')) song = e.target;
+            else song = e.target.parentElement;
+            let songId = song.dataset.songId;
+            this.song.pause();
+            // тут происходит обнуление переменной инпута, в следствии при пересчете в timeReduction обнуляются значения
+            this.input.value = 0;
+            //---------------------
+            this.id = songId;
+            this.togglePlayPause();
+            this.changeSrcInAudioElem(this.settings.playlist[playlistName], songId);
 
-        let song = '';
-        if(e.target.classList.contains('song')) song = e.target;
-        else song = e.target.parentElement;
-        let songId = song.dataset.songId;
-        this.song.pause();
-        // тут происходит обнуление переменной инпута, в следствии при пересчете в timeReduction обнуляются значения
-        this.input.value = 0;
-        //---------------------
-        this.id = songId;
-        this.togglePlayPause();
-        this.changeSrcInAudioElem(this.settings.playlist[playlistName], songId);
-
-        if(this.playingPlaylist != this.getShownPlaylistName()){
-            this.changePlayingPlaylist();
+            if(this.playingPlaylist != this.getShownPlaylistName()){
+                this.changePlayingPlaylist();
+            }
         }
-
+        else {
+            this.writeInLog('слишком быстро нажато, песня еще грузиться');
+        }
 
     };
 
     prevSong = () =>{
-
+        this.showCacheSize();
         if (this.id > 0){
             this.song.pause();
             this.input.value = 0;
@@ -703,6 +762,7 @@ class Audioplayer {
         this.song.pause();
         clearInterval(this.timer);
         this.timer = false;
+        this.showCacheSize();
     };
 
     countTime(){
@@ -1039,12 +1099,12 @@ let Au = new Audioplayer({
                 src: 'https://dl3.ru-music.xn--41a.ws/mp3/3402.mp3',
                 name: "Armin Van Buuren",
                 duration: 191,
-                img: 'https://i3.ru-music.org/img/song/thumb/835-joe-ford-let-it-out.jpg',
+                img: 'https://i3.ru-music.org/img/song/thumb/282-technimatic-clockwise.jpg',
             },
             {
-                src: 'http://a1020.phobos.apple.com/us/r30/Music/4b/ae/15/mzm.sfmdtyty.aac.p.m4a',
-                name: 'Short song',
-                img: 'https://i3.ru-music.org/img/song/thumb/283-tokyo-prose-see-through-love-original-mix.jpg',
+                src: 'https://dl1.ru-music.xn--41a.ws/mp3/835.mp3',
+                name: 'Joe Ford - Let it go',
+                img: 'https://i3.ru-music.org/img/song/thumb/835-joe-ford-let-it-out.jpg',
                 author: '',
                 duration: 170,
                 fullDuration: '03:29'
