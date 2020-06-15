@@ -159,13 +159,21 @@ class Audioplayer {
         this.song.addEventListener('ended', ()=>{
             console.log('finished playing');
             clearInterval(this.timer);
-            if(this.settings.randomSong === true){
+            // если выбран флаг случайной песни только
+            if(this.settings.randomSong === true && this.settings.loop === false){
                 this.discharge();
                 this.startRandomSong();
             }
+            // если выбран флаг случайной песни или оба сразу
+            else if((this.settings.loop === true && this.settings.randomSong === false) || (this.settings.loop === true && this.settings.randomSong === true)){
+                this.discharge();
+                this.song.play();
+            }
+            // если флаги не выбраны
             else {
                 this.nextSong();
             }
+
         });
 
         this.showCacheSize();
@@ -176,8 +184,8 @@ class Audioplayer {
     loopToggle = () => {
         this.loop.classList.toggle('loop-active');
         // переключение параметра loop у аудио элемента
-        this.song.loop = this.song.loop !== true;
-        this.writeInLog('loop = ' + this.song.loop);
+        this.settings.loop = this.settings.loop !== true;
+        this.writeInLog('loop = ' + this.settings.loop);
     };
 
     // переключение вклюения случайной песни
@@ -1179,8 +1187,8 @@ let Au = new Audioplayer({
     stopBtnId: 'stopNew',
     nextBtnId: 'nextNew',
     prevBtnId: 'prevNew',
-    randomSong: true,
-    loop: true
+    randomSong: false,
+    loop: false
 });
 
 Au.on('addSongToPlaylist', function () {
