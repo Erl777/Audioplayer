@@ -62,7 +62,7 @@ class Audioplayer {
         // this.playBtn.addEventListener('click', this.startPlay);
         this.playBtn.addEventListener('click',  () => {
             if(this.playBtn.dataset.action === 'play'){
-                this.song.play();
+                this.playAudio();
             }
             else {
                 this.stopPlay();
@@ -167,7 +167,7 @@ class Audioplayer {
             // если выбран флаг случайной песни или оба сразу
             else if((this.settings.loop === true && this.settings.randomSong === false) || (this.settings.loop === true && this.settings.randomSong === true)){
                 this.discharge();
-                this.song.play();
+                this.playAudio();
             }
             // если флаги не выбраны
             else {
@@ -240,6 +240,67 @@ class Audioplayer {
         document.getElementById('song-duration').textContent = '00:00';
         this.writeInLog('discharged');
     };
+
+    playAudio() {
+        let playlistName = this.getShownPlaylistName();
+        // console.log(playlistName);
+        let songId = this.id;
+        this.song.play()
+        .then(_ => this.updateMetadata(playlistName, songId))
+        .catch(error => console.log(error));
+    }
+
+    updateMetadata(playlistName, songId) {
+        console.log(this);
+        let track = this.settings.playlist[playlistName][songId]; // ???
+        
+        console.log(track);
+        const BASE_URL = 'https://storage.googleapis.com/media-session/';
+      
+        console.log('Playing ' + track.name + ' track...');
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: track.name,
+          artist: "Artist name",
+          album: "Album name",
+          artwork: [
+                    // { src: track.img, sizes: '96x96', type: 'image/jpg' },
+                    // { src: track.img, sizes: '128x128', type: 'image/jpg' },
+                    // { src: track.img, sizes: '192x192', type: 'image/jpg' },
+                    // { src: track.img, sizes: '256x256', type: 'image/jpg' },
+                    // { src: track.img, sizes: '384x384', type: 'image/jpg' },
+                    // { src: track.img, sizes: '512x512', type: 'image/jpg' },
+                    // { src: track.img },
+                    // { src: BASE_URL + 'sintel/artwork-96.png',  sizes: '96x96',   type: 'image/png' },
+                    // { src: BASE_URL + 'sintel/artwork-128.png', sizes: '128x128', type: 'image/png' },
+                    // { src: BASE_URL + 'sintel/artwork-192.png', sizes: '192x192', type: 'image/png' },
+                    // { src: BASE_URL + 'sintel/artwork-256.png', sizes: '256x256', type: 'image/png' },
+                    // { src: BASE_URL + 'sintel/artwork-384.png', sizes: '384x384', type: 'image/png' },
+                    // { src: BASE_URL + 'sintel/artwork-512.png', sizes: '512x512', type: 'image/png' },
+                    { src: track.img, sizes: '512x512', type: 'image/png' },
+                ]
+        });
+        console.log(typeof track.img, track.img);
+        // title: this.settings.playlist[playlistName][songId].name,
+        //         artwork: [
+        //             { src: this.settings.playlist[playlistName][songId].img, sizes: '512x512', type: 'image/png' },
+        //         ]
+      
+        // Media is loaded, set the duration.
+        // this.updatePositionState();
+      }
+      
+      /* Position state (supported since Chrome 81) */
+      
+      updatePositionState() {
+        if ('setPositionState' in navigator.mediaSession) {
+          console.log('Updating position state...');
+          navigator.mediaSession.setPositionState({
+            duration: audio.duration,
+            playbackRate: audio.playbackRate,
+            position: audio.currentTime
+          });
+        }
+      }
 
     newStartPlay = () =>  {
         this.checkSongCondition();
@@ -526,7 +587,7 @@ class Audioplayer {
 
         if(this.song.paused ){
             //console.log('условие is paused');
-            this.song.play();
+            this.playAudio();
             this.countTime();
             this.newTimeReduction();
             // this.getSongName();
@@ -542,7 +603,7 @@ class Audioplayer {
             this.countTime();
             this.newTimeReduction();
             this.input.max = parseInt(this.song.duration);
-            this.song.play();
+            this.playAudio();
         }
 
 
@@ -625,18 +686,18 @@ class Audioplayer {
             console.log(e);
         }
 
-        var playPromise = this.song.play();
-
-        if (playPromise !== undefined) {
-            playPromise.then(_ => {
-                // Automatic playback started!
-            })
-            .catch(error => {
-                console.log('Auto-play was prevented');
-                this.writeInLog('Auto-play was prevented');
-                // Auto-play was prevented
-            });
-        }
+        // var playPromise = this.song.play();
+        this.playAudio();
+        // if (playPromise !== undefined) {
+        //     playPromise.then(_ => {
+        //         // Automatic playback started!
+        //     })
+        //     .catch(error => {
+        //         console.log('Auto-play was prevented');
+        //         this.writeInLog('Auto-play was prevented');
+        //         // Auto-play was prevented
+        //     });
+        // }
         // подтверждаю, что песня запущена
         this.songStaring = false;
         this.showCacheSize();
@@ -1101,7 +1162,8 @@ let Au = new Audioplayer({
                 src: 'https://dl3.ru-music.xn--41a.ws/mp3/4039.mp3',
                 name: "Maruv Boosin",
                 duration: 178,
-                img: 'https://i3.ru-music.org/img/song/thumb/279-the-qemists-no-more.jpg',
+                // img: 'https://i3.ru-music.org/img/song/thumb/279-the-qemists-no-more.jpg',
+                img: 'https://purepng.com/public/uploads/large/purepng.com-tonguetonguemouthswallowingtaste-budshuman-tongue-1421526977101e4qbe.png',
             },
             {
                 src: 'https://dl3.ru-music.xn--41a.ws/mp3/3402.mp3',
@@ -1123,7 +1185,8 @@ let Au = new Audioplayer({
             {
                 src: 'music/halogen-u-got-that.mp3',
                 name: 'Halogen u got that',
-                img: 'https://i3.ru-music.org/img/song/thumb/3402-armin-van-buuren-shivers-ft-susana.jpg',
+                // img: 'https://i3.ru-music.org/img/song/thumb/3402-armin-van-buuren-shivers-ft-susana.jpg',
+                img: 'https://www.logolynx.com/images/logolynx/ef/eff98a934aa36ddd98c9f5bc39c46129.png',
                 author: '',
                 duration: 187,
                 fullDuration: '03:07'
