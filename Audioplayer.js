@@ -251,35 +251,27 @@ class Audioplayer {
     }
 
     updateMetadata(playlistName, songId) {
-        console.log(this);
+        // console.log(this);
         let track = this.settings.playlist[playlistName][songId]; // ???
         
-        console.log(track);
-        const BASE_URL = 'https://storage.googleapis.com/media-session/';
+        // console.log(track);
+        // const BASE_URL = 'https://storage.googleapis.com/media-session/';
       
-        console.log('Playing ' + track.name + ' track...');
+        // console.log('Playing ' + track.name + ' track...');
         navigator.mediaSession.metadata = new MediaMetadata({
           title: track.name,
           artist: "Artist name",
           album: "Album name",
-          artwork: [
-                    // { src: track.img, sizes: '96x96', type: 'image/jpg' },
-                    // { src: track.img, sizes: '128x128', type: 'image/jpg' },
-                    // { src: track.img, sizes: '192x192', type: 'image/jpg' },
-                    // { src: track.img, sizes: '256x256', type: 'image/jpg' },
-                    // { src: track.img, sizes: '384x384', type: 'image/jpg' },
-                    // { src: track.img, sizes: '512x512', type: 'image/jpg' },
-                    // { src: track.img },
-                    // { src: BASE_URL + 'sintel/artwork-96.png',  sizes: '96x96',   type: 'image/png' },
-                    // { src: BASE_URL + 'sintel/artwork-128.png', sizes: '128x128', type: 'image/png' },
-                    // { src: BASE_URL + 'sintel/artwork-192.png', sizes: '192x192', type: 'image/png' },
-                    // { src: BASE_URL + 'sintel/artwork-256.png', sizes: '256x256', type: 'image/png' },
-                    // { src: BASE_URL + 'sintel/artwork-384.png', sizes: '384x384', type: 'image/png' },
-                    // { src: BASE_URL + 'sintel/artwork-512.png', sizes: '512x512', type: 'image/png' },
-                    { src: track.img, sizes: '512x512', type: 'image/png' },
-                ]
+          artwork: track.artwork
         });
-        console.log(typeof track.img, track.img);
+        // console.log(typeof track.img, track.img);
+        // let metadata = {
+        //     title: track.name,
+        //     artist: "Artist name",
+        //     album: "Album name",
+        //     artwork: track.artwork
+        //   };
+        // navigator.mediaSession.setMetadata(metadata);
         // title: this.settings.playlist[playlistName][songId].name,
         //         artwork: [
         //             { src: this.settings.playlist[playlistName][songId].img, sizes: '512x512', type: 'image/png' },
@@ -291,16 +283,16 @@ class Audioplayer {
       
       /* Position state (supported since Chrome 81) */
       
-      updatePositionState() {
-        if ('setPositionState' in navigator.mediaSession) {
-          console.log('Updating position state...');
-          navigator.mediaSession.setPositionState({
-            duration: audio.duration,
-            playbackRate: audio.playbackRate,
-            position: audio.currentTime
-          });
-        }
-      }
+      // updatePositionState() {
+      //   if ('setPositionState' in navigator.mediaSession) {
+      //     console.log('Updating position state...');
+      //     navigator.mediaSession.setPositionState({
+      //       duration: audio.duration,
+      //       playbackRate: audio.playbackRate,
+      //       position: audio.currentTime
+      //     });
+      //   }
+      // }
 
     newStartPlay = () =>  {
         this.checkSongCondition();
@@ -941,12 +933,13 @@ class Audioplayer {
                 event.target.classList.add('playing');
             }
         }
-
+        this.reloadShownPlaylist();
     };
 
     clearPlayingSongs(){
         // очистка всех элементов с классом playing
-        let playingSongs = document.querySelectorAll('.song');
+        let playingSongs = document.querySelectorAll('.playing');
+        // console.log(playingSongs);
         for (let i = 0; i< playingSongs.length; i++){
             playingSongs[i].classList.remove('playing');
         }
@@ -1153,7 +1146,7 @@ class Audioplayer {
     }
 
 }
-
+const BASE_URL = 'https://storage.googleapis.com/media-session/';
 let Au = new Audioplayer({
     playlist: {
 
@@ -1164,12 +1157,28 @@ let Au = new Audioplayer({
                 duration: 178,
                 // img: 'https://i3.ru-music.org/img/song/thumb/279-the-qemists-no-more.jpg',
                 img: 'https://purepng.com/public/uploads/large/purepng.com-tonguetonguemouthswallowingtaste-budshuman-tongue-1421526977101e4qbe.png',
+                artwork: [
+                    { src: BASE_URL + 'sintel/artwork-96.png',  sizes: '96x96',   type: 'image/png' },
+                    { src: BASE_URL + 'sintel/artwork-128.png', sizes: '128x128', type: 'image/png' },
+                    { src: BASE_URL + 'sintel/artwork-192.png', sizes: '192x192', type: 'image/png' },
+                    { src: BASE_URL + 'sintel/artwork-256.png', sizes: '256x256', type: 'image/png' },
+                    { src: BASE_URL + 'sintel/artwork-384.png', sizes: '384x384', type: 'image/png' },
+                    { src: BASE_URL + 'sintel/artwork-512.png', sizes: '512x512', type: 'image/png' },
+                  ]
             },
             {
                 src: 'https://dl3.ru-music.xn--41a.ws/mp3/3402.mp3',
                 name: "Armin Van Buuren",
                 duration: 191,
                 img: 'https://i3.ru-music.org/img/song/thumb/282-technimatic-clockwise.jpg',
+                artwork: [
+                    { src: BASE_URL + 'big-buck-bunny/artwork-96.png',  sizes: '96x96',   type: 'image/png' },
+                    { src: BASE_URL + 'big-buck-bunny/artwork-128.png', sizes: '128x128', type: 'image/png' },
+                    { src: BASE_URL + 'big-buck-bunny/artwork-192.png', sizes: '192x192', type: 'image/png' },
+                    { src: BASE_URL + 'big-buck-bunny/artwork-256.png', sizes: '256x256', type: 'image/png' },
+                    { src: BASE_URL + 'big-buck-bunny/artwork-384.png', sizes: '384x384', type: 'image/png' },
+                    { src: BASE_URL + 'big-buck-bunny/artwork-512.png', sizes: '512x512', type: 'image/png' },
+                  ]
             },
             {
                 src: 'https://dl1.ru-music.xn--41a.ws/mp3/835.mp3',
@@ -1177,7 +1186,15 @@ let Au = new Audioplayer({
                 img: 'https://i3.ru-music.org/img/song/thumb/835-joe-ford-let-it-out.jpg',
                 author: '',
                 duration: 170,
-                fullDuration: '03:29'
+                fullDuration: '03:29',
+                artwork: [
+                    { src: BASE_URL + 'elephants-dream/artwork-96.png',  sizes: '96x96',   type: 'image/png' },
+                    { src: BASE_URL + 'elephants-dream/artwork-128.png', sizes: '128x128', type: 'image/png' },
+                    { src: BASE_URL + 'elephants-dream/artwork-192.png', sizes: '192x192', type: 'image/png' },
+                    { src: BASE_URL + 'elephants-dream/artwork-256.png', sizes: '256x256', type: 'image/png' },
+                    { src: BASE_URL + 'elephants-dream/artwork-384.png', sizes: '384x384', type: 'image/png' },
+                    { src: BASE_URL + 'elephants-dream/artwork-512.png', sizes: '512x512', type: 'image/png' },
+                  ]
             }
         ],
 
