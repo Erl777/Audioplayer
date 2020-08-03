@@ -933,7 +933,6 @@ class Audioplayer {
                 event.target.classList.add('playing');
             }
         }
-        this.reloadShownPlaylist();
     };
 
     clearPlayingSongs(){
