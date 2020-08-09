@@ -11,125 +11,91 @@
 </head>
 <body>
 
-    <div class="container gradient">
+    <div class="audioplayer">
+        <div class="body">
 
-        <div class="player controls">
-
-            <div class="buttons">
-
-                <button class="button shadow" id="prevNew" type="button" title="">
-                    <img class="img-relative" src="img/next.svg" style="transform: rotate(180deg)" alt="">
-                </button>
-                <button class="button shadow" id="playNew" type="button" title="" data-action="pause">
-                    <img class="img-relative play" src="img/play.svg" alt="">
-                    <img class="img-relative pause" src="img/pause.svg" alt="">
+            <div class="albums-list-container">
+                <button type="button" id="openNewPlaylistField">
+                    <img src="img/icons/plus.svg" alt="">
                 </button>
 
-                <button class="button shadow" id="stopNew" type="button" title="Сброс">
-                    <img class="img-relative" src="img/stop.svg" alt="">
-                </button>
-                <button class="button shadow" id="nextNew" type="button" title="">
-                    <img class="img-relative" src="img/next.svg" alt="">
-                </button>
+                <div class="albums-list custom-scroll">
+
+                </div>
 
             </div>
 
-            <div class="progress-and-time">
-                <input type="range" id="seek" value="0" max=""/>
-                <span id="preload" title="song preload">0%</span>
-                <span id="timeleft">00:00</span>
-                <span class="separator">/</span>
-                <span id="song-duration">00:00</span>
-            </div>
+            <div class="songs-list">
+
+                <div class="songs-list__header">
+                    <div class="album-name-container">
+                        <p class="album-name">
+                            Название альбома
+                        </p>
+                        <span class="number-of-songs">255 песен</span>
+                    </div>
+
+                    <button type="button" id="openAddingField">
+                        <img src="img/icons/plus.svg" alt="">
+                    </button>
+                </div>
+
+                <div class="songs-list__container">
+
+                    <ol class="songs-ol custom-scroll" id="playlist" data-playlist-name="default">
+
+                    </ol>
+
+                    <div class="songs-list__actions">
+                        <div class="buttons">
+                            <button type="button" class="random js-random" title="Случайная песня">
+                                <img class="img-relative " src="img/icons/shuffle_active.svg" alt="">
+                                <img class="img-relative " src="img/icons/shuffle.svg" alt="">
+                            </button>
+                            <button type="button" class="loop js-loop" title="Повтор">
+                                <img class="img-relative" src="img/icons/repeat_active.svg" alt="">
+                                <img class="img-relative " src="img/icons/repeat.svg" alt="">
+                            </button>
+                        </div>
+                        <div class="volume-mobile">
+                            <img src="img/icons/vol_min.svg" alt="">
+                            <input id="volume-mobile" type="range" min="0" max="100">
+                            <img src="img/icons/vol_medium.svg" alt="">
+                        </div>
+                    </div>
+                </div>
 
 
-<!--            <p id="trackName" title="song name"></p>-->
-
-            <div id="audios">
-
-            </div>
-
-        </div><!-- / player -->
-
-        <div class="more-actions">
-            <span id="cachesSize">
-                0 Mb
-            </span>
-            <div id="clear-caches" class="img-container clear-caches" title="очистить кеш">
-                <img src="img/send-to-trash.svg" alt="" class="img-relative">
-            </div>
-            <div class="img-container js-loop" title="зациклить песню">
-                <img src="img/loop.svg" alt="" class="img-relative">
-            </div>
-            <div class="img-container js-random" title="случайная песня">
-                <img src="img/change.svg" alt="" class="img-relative">
             </div>
         </div>
 
-        <!-- playlist -->
-
-        <div class="playlist">
-
-            <div class="openAddingField" id="openAddingField" title="Добавить песню в открытый плейлист">
-                <img src="img/plus.svg" alt="">
+        <div class="footer">
+            <div class="main-controls">
+                <button type="button" id="prev" class="prev">
+                    <img src="img/icons/prev.svg" alt="">
+                </button>
+                <button type="button" id="play" class="play" data-action="pause">
+                    <img class="img-relative pause" src="img/icons/pause.svg" alt="">
+                    <img class="img-relative play" src="img/play.svg" alt="">
+                </button>
+                <button type="button" id="next" class="next">
+                    <img src="img/icons/next.svg" alt="">
+                </button>
             </div>
-
-            <div id="addSongField" class="addSongField">
-
-                <div>
-                    <label>
-                        Название песни:
-                        <input id="newSongName" type="text">
-                    </label>
-
-                    <label>
-                        Путь к песне*:
-                        <input id="newSongSrc" type="text">
-                    </label>
-
-                    <label>
-                        Изображение для песни:
-                        <input id="newSongImg" type="text">
-                    </label>
-
-<!--                    <label>-->
-<!--                        Длительность песни:-->
-<!--                        <input id="newSongDuration" type="text" value="00:00">-->
-<!--                    </label>-->
-
+            <div class="song-info">
+                <p class="song-name" id="trackName">
+                    Song name
+                </p>
+                <div class="progress-bar">
+                    <span class="time before" id="timeleft">2:22</span>
+                    <input type="range" id="seek" value="0" max="">
+                    <span class="time after" id="song-duration">-1:23</span>
                 </div>
-
-                <div class="adding-controls">
-                    <button type="button" id="addSongBtn">Добавить</button>
-                    <button type="button" id="addSongBtnClose">Закрыть</button>
-                </div>
-
             </div>
+        </div>
+        <!-- cюда добавляется аудио элемент -->
+        <div id="audio">
 
-            <div id="addPlaylistField" class="addPlaylistField">
-
-                <div>
-                    <label>
-                        Название плейлиста:
-                        <input id="newPlaylistName" type="text">
-                    </label>
-
-                </div>
-
-                <div class="adding-controls">
-                    <button type="button" id="addPlaylistBtn">Добавить</button>
-                    <button type="button" id="addPlaylistBtnClose">Закрыть</button>
-                </div>
-
-            </div>
-
-            <div class="playlists">
-
-            </div>
-
-            <div id="playlist" data-playlist-name="default">
-
-            </div>
         </div>
 
         <div class="modal-overlay">
@@ -140,17 +106,10 @@
             </div>
         </div>
 
-        <div id="mylog">
-
-        </div>
-
-        <div class="open-log js-open-log">
-            <span>open log</span>
-        </div>
-
-    </div><!-- / Container-->
+    </div>
 
 <script src="templates.js"></script>
-<script src="Audioplayer.js?v-1.0" defer></script>
+<!--<script src="Audioplayer.js?1" defer></script>-->
+<script src="Audioplayer_minimized.js" defer></script>
 </body>
 </html>
