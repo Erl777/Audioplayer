@@ -338,7 +338,7 @@ class Audioplayer {
             this.togglePlayPause();
             // подсветка текущего трека
             this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
-            // this.getSongLoadedPercent();
+            this.getSongLoadedPercent();
         }
         this.song.onloadeddata = () =>{
             this.countTime();
@@ -353,7 +353,7 @@ class Audioplayer {
 
             // подсветка текущего трека
             this.highlightPlayingSong(event, this.getCurrentPlayingSongDOMElem());
-            // this.getSongLoadedPercent();
+            this.getSongLoadedPercent();
         }
 
     };
@@ -1199,7 +1199,7 @@ let Au = new Audioplayer({
     // nextBtnId: 'nextNew',
     // prevBtnId: 'prevNew',
     randomSong: false,
-    loop: true
+    loop: false
 });
 
 Au.on('addSongToPlaylist', function () {
